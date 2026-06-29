@@ -1,44 +1,60 @@
 <header class="navbar">
-  <div class="brand">
-    <div class="logo">CF</div>
+  <div class="navbar-content">
+    <a routerLink="/" class="brand" (click)="cerrarMenu()">
+      <div class="logo">CF</div>
 
-    <div>
-      <h1>CoreFlow</h1>
-      <p>Gestión Comercial Segura</p>
-    </div>
-  </div>
-
-  <nav class="menu">
-    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-      Inicio
+      <div>
+        <h1>CoreFlow</h1>
+        <p>Gestión Comercial Segura</p>
+      </div>
     </a>
 
-    <a routerLink="/productos" routerLinkActive="active">
-      Productos
-    </a>
-
-    <a routerLink="/pedidos" routerLinkActive="active">
-      Pedidos
-    </a>
-
-    <a *ngIf="!auth.estaAutenticado()" routerLink="/login" routerLinkActive="active">
-      Login
-    </a>
-
-    <a *ngIf="!auth.estaAutenticado()" routerLink="/registro" routerLinkActive="active">
-      Registro
-    </a>
-
-    <span *ngIf="auth.estaAutenticado()" class="user-badge">
-      {{ auth.obtenerUsuario() }} - {{ auth.obtenerRol() }}
-    </span>
-
-    <button *ngIf="auth.estaAutenticado()" class="logout-btn" type="button" (click)="cerrarSesion()">
-      Cerrar sesión
+    <button class="menu-toggle" type="button" (click)="cambiarMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
     </button>
-  </nav>
+
+    <nav class="menu" [class.open]="menuAbierto">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="cerrarMenu()">
+        Inicio
+      </a>
+
+      <a routerLink="/productos" routerLinkActive="active" (click)="cerrarMenu()">
+        Productos
+      </a>
+
+      <a routerLink="/pedidos" routerLinkActive="active" (click)="cerrarMenu()">
+        Pedidos
+      </a>
+
+      <a *ngIf="!auth.estaAutenticado()" routerLink="/login" routerLinkActive="active" (click)="cerrarMenu()">
+        Login
+      </a>
+
+      <a *ngIf="!auth.estaAutenticado()" routerLink="/registro" routerLinkActive="active" (click)="cerrarMenu()">
+        Registro
+      </a>
+
+      <div *ngIf="auth.estaAutenticado()" class="session-box">
+        <span class="user-badge">
+          {{ auth.obtenerUsuario() }} · {{ auth.obtenerRol() }}
+        </span>
+
+        <button class="logout-btn" type="button" (click)="cerrarSesion()">
+          Cerrar sesión
+        </button>
+      </div>
+    </nav>
+  </div>
 </header>
 
 <main class="container">
   <router-outlet></router-outlet>
 </main>
+
+<footer class="footer">
+  <p>
+    CoreFlow API · Angular + Spring Boot + MySQL + JWT
+  </p>
+</footer>

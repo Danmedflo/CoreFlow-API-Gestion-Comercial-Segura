@@ -14,8 +14,19 @@ export class App {
   auth = inject(Auth);
   private router = inject(Router);
 
+  menuAbierto = false;
+
+  cambiarMenu(): void {
+    this.menuAbierto = !this.menuAbierto;
+  }
+
+  cerrarMenu(): void {
+    this.menuAbierto = false;
+  }
+
   cerrarSesion(): void {
     this.auth.cerrarSesion();
+    this.menuAbierto = false;
     this.router.navigate(['/login']);
   }
 }
