@@ -1,1 +1,66 @@
-<p>login works!</p>
+<section class="auth-page">
+  <div class="auth-card">
+    <h2>Iniciar sesión</h2>
+    <p class="subtitle">
+      Accede al sistema para administrar productos y pedidos.
+    </p>
+
+    <div *ngIf="mensaje" class="alert success">
+      {{ mensaje }}
+    </div>
+
+    <div *ngIf="error" class="alert error">
+      {{ error }}
+    </div>
+
+    <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)">
+      <div class="field">
+        <label>Usuario</label>
+        <input
+          type="text"
+          name="username"
+          [(ngModel)]="username"
+          required
+          minlength="3"
+          placeholder="Ejemplo: admin"
+          #usernameCtrl="ngModel"
+        />
+
+        <small *ngIf="usernameCtrl.invalid && usernameCtrl.touched">
+          El usuario es obligatorio y debe tener mínimo 3 caracteres.
+        </small>
+      </div>
+
+      <div class="field">
+        <label>Contraseña</label>
+        <input
+          type="password"
+          name="password"
+          [(ngModel)]="password"
+          required
+          minlength="4"
+          placeholder="Ejemplo: 123456"
+          #passwordCtrl="ngModel"
+        />
+
+        <small *ngIf="passwordCtrl.invalid && passwordCtrl.touched">
+          La contraseña es obligatoria.
+        </small>
+      </div>
+
+      <button type="submit" class="btn btn-primary" [disabled]="loginForm.invalid || cargando">
+        {{ cargando ? 'Ingresando...' : 'Ingresar' }}
+      </button>
+    </form>
+
+    <div class="hint">
+      <strong>Usuario administrador:</strong>
+      <span>admin / 123456</span>
+    </div>
+
+    <p class="register-link">
+      ¿No tienes cuenta?
+      <a routerLink="/registro">Regístrate aquí</a>
+    </p>
+  </div>
+</section>

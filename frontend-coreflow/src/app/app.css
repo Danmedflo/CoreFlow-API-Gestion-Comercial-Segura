@@ -88,3 +88,21 @@
     width: 100%;
   }
 }
+
+.user-badge {
+  background: #0f766e;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.logout-btn {
+  border: none;
+  background: #dc2626;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}

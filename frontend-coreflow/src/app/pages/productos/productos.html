@@ -1,1 +1,104 @@
-<p>productos works!</p>
+<section class="page-header">
+  <div>
+    <h2>Gestión de Productos</h2>
+    <p>Listado, búsqueda y mantenimiento de productos del sistema comercial.</p>
+  </div>
+
+  <a routerLink="/productos/nuevo" class="btn btn-primary">
+    + Nuevo producto
+  </a>
+</section>
+
+<section class="card">
+  <h3>Filtros de búsqueda</h3>
+
+  <div class="filters">
+    <div class="field">
+      <label>Buscar por nombre</label>
+      <input
+        type="text"
+        placeholder="Ejemplo: Laptop"
+        [(ngModel)]="nombreBusqueda"
+      />
+      <button class="btn btn-secondary" type="button" (click)="buscarPorNombre()">
+        Buscar nombre
+      </button>
+    </div>
+
+    <div class="field">
+      <label>Buscar por categoría</label>
+      <input
+        type="text"
+        placeholder="Ejemplo: Tecnología"
+        [(ngModel)]="categoriaBusqueda"
+      />
+      <button class="btn btn-secondary" type="button" (click)="buscarPorCategoria()">
+        Buscar categoría
+      </button>
+    </div>
+
+    <div class="field field-actions">
+      <label>&nbsp;</label>
+      <button class="btn btn-light" type="button" (click)="limpiarFiltros()">
+        Limpiar filtros
+      </button>
+    </div>
+  </div>
+</section>
+
+<div *ngIf="mensaje" class="alert success">
+  {{ mensaje }}
+</div>
+
+<div *ngIf="error" class="alert error">
+  {{ error }}
+</div>
+
+<section class="card">
+  <div class="table-header">
+    <h3>Productos registrados</h3>
+    <button class="btn btn-light" type="button" (click)="cargarProductos()">
+      Actualizar
+    </button>
+  </div>
+
+  <p *ngIf="cargando">Cargando productos...</p>
+
+  <div *ngIf="!cargando && productos.length === 0" class="empty">
+    No hay productos registrados o no se encontraron resultados.
+  </div>
+
+  <div class="table-container" *ngIf="!cargando && productos.length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Categoría</th>
+          <th>Precio</th>
+          <th>Stock</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let producto of productos">
+          <td>{{ producto.id }}</td>
+          <td>{{ producto.nombre }}</td>
+          <td>{{ producto.categoria }}</td>
+          <td>S/ {{ producto.precio | number:'1.2-2' }}</td>
+          <td>{{ producto.stock }}</td>
+          <td class="actions">
+            <a class="btn btn-edit" [routerLink]="['/productos/editar', producto.id]">
+              Editar
+            </a>
+
+            <button class="btn btn-danger" type="button" (click)="eliminarProducto(producto.id)">
+              Eliminar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

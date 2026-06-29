@@ -64,6 +64,7 @@ public class AuthController {
         }
 
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+        usuario.setRol("USER");
         usuario.setActivo(true);
 
         Usuario usuarioGuardado = usuarioRepository.save(usuario);

@@ -21,13 +21,21 @@
       Pedidos
     </a>
 
-    <a routerLink="/login" routerLinkActive="active">
+    <a *ngIf="!auth.estaAutenticado()" routerLink="/login" routerLinkActive="active">
       Login
     </a>
 
-    <a routerLink="/registro" routerLinkActive="active">
+    <a *ngIf="!auth.estaAutenticado()" routerLink="/registro" routerLinkActive="active">
       Registro
     </a>
+
+    <span *ngIf="auth.estaAutenticado()" class="user-badge">
+      {{ auth.obtenerUsuario() }} - {{ auth.obtenerRol() }}
+    </span>
+
+    <button *ngIf="auth.estaAutenticado()" class="logout-btn" type="button" (click)="cerrarSesion()">
+      Cerrar sesión
+    </button>
   </nav>
 </header>
 
