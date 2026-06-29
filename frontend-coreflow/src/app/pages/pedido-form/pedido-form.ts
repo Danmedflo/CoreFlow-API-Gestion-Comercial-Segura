@@ -18,6 +18,8 @@ export class PedidoForm implements OnInit {
   private router = inject(Router);
   auth = inject(Auth);
 
+  estados = ['PENDIENTE', 'EN_PROCESO', 'COMPLETADO', 'CANCELADO'];
+
   pedido: PedidoModel = {
     cliente: '',
     fecha: new Date().toISOString().slice(0, 10),
@@ -70,7 +72,7 @@ export class PedidoForm implements OnInit {
     }
 
     if (form.invalid) {
-      this.error = 'Completa correctamente todos los campos.';
+      this.error = 'Completa correctamente todos los campos requeridos.';
       return;
     }
 
@@ -111,5 +113,22 @@ export class PedidoForm implements OnInit {
         this.cargando = false;
       }
     });
+  }
+
+  estadoClass(): string {
+    switch (this.pedido.estado) {
+      case 'COMPLETADO':
+        return 'status-success';
+      case 'EN_PROCESO':
+        return 'status-info';
+      case 'CANCELADO':
+        return 'status-danger';
+      default:
+        return 'status-warning';
+    }
+  }
+
+  inicialCliente(): string {
+    return this.pedido.cliente ? this.pedido.cliente.charAt(0).toUpperCase() : 'C';
   }
 }

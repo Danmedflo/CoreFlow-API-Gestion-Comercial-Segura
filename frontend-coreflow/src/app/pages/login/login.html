@@ -1,9 +1,50 @@
-<section class="auth-page">
-  <div class="auth-card">
-    <h2>Iniciar sesión</h2>
-    <p class="subtitle">
-      Accede al sistema para administrar productos y pedidos.
+<section class="auth-layout">
+  <div class="auth-info">
+    <span class="eyebrow">Acceso seguro</span>
+
+    <h2>Bienvenido a CoreFlow</h2>
+
+    <p>
+      Inicia sesión para acceder a las operaciones administrativas del sistema.
+      Las acciones críticas se protegen mediante token JWT y control de roles.
     </p>
+
+    <div class="security-list">
+      <div class="security-item">
+        <span class="security-index">01</span>
+        <div>
+          <strong>Autenticación JWT</strong>
+          <p>El backend genera un token para validar las solicitudes protegidas.</p>
+        </div>
+      </div>
+
+      <div class="security-item">
+        <span class="security-index">02</span>
+        <div>
+          <strong>Control por rol</strong>
+          <p>Solo usuarios ADMIN pueden crear, editar o eliminar registros.</p>
+        </div>
+      </div>
+
+      <div class="security-item">
+        <span class="security-index">03</span>
+        <div>
+          <strong>Sesión administrada</strong>
+          <p>Angular conserva la sesión y envía el token automáticamente.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-card">
+    <div class="card-header">
+      <div class="brand-mark">CF</div>
+
+      <div>
+        <h3>Iniciar sesión</h3>
+        <p>Ingresa tus credenciales para continuar.</p>
+      </div>
+    </div>
 
     <div *ngIf="mensaje" class="alert success">
       {{ mensaje }}
@@ -22,7 +63,7 @@
           [(ngModel)]="username"
           required
           minlength="3"
-          placeholder="Ejemplo: admin"
+          placeholder="Ingresa tu usuario"
           #usernameCtrl="ngModel"
         />
 
@@ -39,7 +80,7 @@
           [(ngModel)]="password"
           required
           minlength="4"
-          placeholder="Ejemplo: 123456"
+          placeholder="Ingresa tu contraseña"
           #passwordCtrl="ngModel"
         />
 
@@ -49,18 +90,24 @@
       </div>
 
       <button type="submit" class="btn btn-primary" [disabled]="loginForm.invalid || cargando">
-        {{ cargando ? 'Ingresando...' : 'Ingresar' }}
+        {{ cargando ? 'Validando acceso...' : 'Acceder al sistema' }}
       </button>
     </form>
 
-    <div class="hint">
-      <strong>Usuario administrador:</strong>
-      <span>admin / 123456</span>
+    <div class="demo-box">
+      <div>
+        <strong>Credencial de administrador</strong>
+        <p>Usuario: admin · Contraseña: 123456</p>
+      </div>
+
+      <button type="button" (click)="usarCredencialesAdmin()">
+        Usar
+      </button>
     </div>
 
-    <p class="register-link">
+    <p class="switch-link">
       ¿No tienes cuenta?
-      <a routerLink="/registro">Regístrate aquí</a>
+      <a routerLink="/registro">Crear usuario</a>
     </p>
   </div>
 </section>

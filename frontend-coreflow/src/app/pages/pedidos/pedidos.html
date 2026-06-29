@@ -1,53 +1,85 @@
-<section class="page-header">
+<section class="module-header">
   <div>
+    <span class="eyebrow">Módulo operativo</span>
     <h2>Gestión de Pedidos</h2>
-    <p>Listado, búsqueda y mantenimiento de pedidos comerciales.</p>
+    <p>
+      Supervisa pedidos comerciales, controla estados, consulta clientes y administra operaciones protegidas.
+    </p>
   </div>
 
   <a *ngIf="auth.esAdmin()" routerLink="/pedidos/nuevo" class="btn btn-primary">
-    + Nuevo pedido
+    Nuevo pedido
   </a>
 </section>
 
-<section *ngIf="!auth.esAdmin()" class="notice">
-  Estás en modo consulta. Para crear, editar o eliminar pedidos debes iniciar sesión como ADMIN.
+<section class="summary-grid">
+  <article class="summary-card">
+    <span class="summary-label">Pedidos</span>
+    <strong>{{ pedidos.length }}</strong>
+    <p>Registros encontrados</p>
+  </article>
+
+  <article class="summary-card">
+    <span class="summary-label">Total comercial</span>
+    <strong>S/ {{ totalVentas() | number:'1.2-2' }}</strong>
+    <p>Monto acumulado</p>
+  </article>
+
+  <article class="summary-card">
+    <span class="summary-label">Completados</span>
+    <strong>{{ pedidosCompletados() }}</strong>
+    <p>Pedidos finalizados</p>
+  </article>
+
+  <article class="summary-card">
+    <span class="summary-label">Pendientes</span>
+    <strong>{{ pedidosPendientes() }}</strong>
+    <p>Pedidos por atender</p>
+  </article>
 </section>
 
-<section class="card">
-  <h3>Filtros de búsqueda</h3>
+<section *ngIf="!auth.esAdmin()" class="notice">
+  Modo consulta activo. Las operaciones de creación, edición y eliminación requieren una sesión con rol ADMIN.
+</section>
+
+<section class="panel">
+  <div class="panel-title">
+    <div>
+      <h3>Filtros de búsqueda</h3>
+      <p>Consulta pedidos por cliente o por estado operativo.</p>
+    </div>
+
+    <button class="btn btn-ghost" type="button" (click)="limpiarFiltros()">
+      Limpiar
+    </button>
+  </div>
 
   <div class="filters">
     <div class="field">
-      <label>Buscar por cliente</label>
+      <label>Cliente</label>
       <input
         type="text"
-        placeholder="Ejemplo: Juan Pérez"
+        placeholder="Buscar por cliente"
         [(ngModel)]="clienteBusqueda"
       />
-      <button class="btn btn-secondary" type="button" (click)="buscarPorCliente()">
+
+      <button class="btn btn-dark" type="button" (click)="buscarPorCliente()">
         Buscar cliente
       </button>
     </div>
 
     <div class="field">
-      <label>Buscar por estado</label>
+      <label>Estado</label>
       <select [(ngModel)]="estadoBusqueda">
-        <option value="">Seleccione estado</option>
+        <option value="">Seleccionar estado</option>
         <option value="PENDIENTE">PENDIENTE</option>
-        <option value="EN_PROCESO">EN_PROCESO</option>
+        <option value="EN_PROCESO">EN PROCESO</option>
         <option value="COMPLETADO">COMPLETADO</option>
         <option value="CANCELADO">CANCELADO</option>
       </select>
 
-      <button class="btn btn-secondary" type="button" (click)="buscarPorEstado()">
+      <button class="btn btn-dark" type="button" (click)="buscarPorEstado()">
         Buscar estado
-      </button>
-    </div>
-
-    <div class="field field-actions">
-      <label>&nbsp;</label>
-      <button class="btn btn-light" type="button" (click)="limpiarFiltros()">
-        Limpiar filtros
       </button>
     </div>
   </div>
@@ -61,26 +93,31 @@
   {{ error }}
 </div>
 
-<section class="card">
-  <div class="table-header">
-    <h3>Pedidos registrados</h3>
+<section class="panel">
+  <div class="panel-title">
+    <div>
+      <h3>Registro de pedidos</h3>
+      <p>Listado actualizado de pedidos almacenados en el sistema.</p>
+    </div>
 
-    <button class="btn btn-light" type="button" (click)="cargarPedidos()">
+    <button class="btn btn-ghost" type="button" (click)="cargarPedidos()">
       Actualizar
     </button>
   </div>
 
-  <p *ngIf="cargando">Cargando pedidos...</p>
+  <div *ngIf="cargando" class="loading">
+    Cargando información de pedidos...
+  </div>
 
-  <div *ngIf="!cargando && pedidos.length === 0" class="empty">
-    No hay pedidos registrados o no se encontraron resultados.
+  <div *ngIf="!cargando && pedidos.length === 0" class="empty-state">
+    <h3>No se encontraron pedidos</h3>
+    <p>No existen registros disponibles o los filtros aplicados no tienen coincidencias.</p>
   </div>
 
   <div class="table-container" *ngIf="!cargando && pedidos.length > 0">
     <table>
       <thead>
         <tr>
-          <th>ID</th>
           <th>Cliente</th>
           <th>Fecha</th>
           <th>Total</th>
@@ -91,12 +128,31 @@
 
       <tbody>
         <tr *ngFor="let pedido of pedidos">
-          <td>{{ pedido.id }}</td>
-          <td>{{ pedido.cliente }}</td>
-          <td>{{ pedido.fecha }}</td>
-          <td>S/ {{ pedido.total | number:'1.2-2' }}</td>
           <td>
-            <span class="status">
+            <div class="client-cell">
+              <div class="client-avatar">
+                {{ inicialCliente(pedido.cliente) }}
+              </div>
+
+              <div>
+                <strong>{{ pedido.cliente }}</strong>
+                <span>ID: {{ pedido.id }}</span>
+              </div>
+            </div>
+          </td>
+
+          <td>
+            <span class="date-text">
+              {{ pedido.fecha | date:'dd/MM/yyyy' }}
+            </span>
+          </td>
+
+          <td class="amount">
+            S/ {{ pedido.total | number:'1.2-2' }}
+          </td>
+
+          <td>
+            <span class="status-pill" [ngClass]="estadoClass(pedido.estado)">
               {{ pedido.estado }}
             </span>
           </td>
@@ -106,7 +162,7 @@
               Editar
             </a>
 
-            <button class="btn btn-danger" type="button" (click)="eliminarPedido(pedido.id)">
+            <button class="btn btn-danger" type="button" (click)="abrirConfirmacionEliminar(pedido)">
               Eliminar
             </button>
           </td>
@@ -115,3 +171,14 @@
     </table>
   </div>
 </section>
+
+<app-confirm-modal
+  [visible]="pedidoAEliminar !== null"
+  titulo="Eliminar pedido"
+  mensaje="Esta acción eliminará el pedido seleccionado del registro comercial."
+  [detalle]="'Cliente: ' + (pedidoAEliminar?.cliente || '') + ' · Total: S/ ' + (pedidoAEliminar?.total || 0)"
+  textoCancelar="Cancelar"
+  textoConfirmar="Eliminar"
+  (cancelar)="cancelarEliminacion()"
+  (confirmar)="confirmarEliminacion()"
+></app-confirm-modal>

@@ -1,0 +1,29 @@
+<div class="modal-backdrop" *ngIf="visible">
+  <section class="modal-card">
+    <div class="modal-icon">
+      !
+    </div>
+
+    <div class="modal-content">
+      <span class="modal-label">Confirmación requerida</span>
+
+      <h3>{{ titulo }}</h3>
+
+      <p>{{ mensaje }}</p>
+
+      <div *ngIf="detalle" class="detail-box">
+        {{ detalle }}
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-light" type="button" (click)="cancelarAccion()">
+          {{ textoCancelar }}
+        </button>
+
+        <button class="btn btn-danger" type="button" (click)="confirmarAccion()">
+          {{ textoConfirmar }}
+        </button>
+      </div>
+    </div>
+  </section>
+</div>

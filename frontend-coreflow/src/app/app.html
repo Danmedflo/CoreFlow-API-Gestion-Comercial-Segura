@@ -1,60 +1,97 @@
-<header class="navbar">
-  <div class="navbar-content">
-    <a routerLink="/" class="brand" (click)="cerrarMenu()">
-      <div class="logo">CF</div>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a routerLink="/" class="brand" (click)="cerrarMenu()">
+        <div class="brand-logo">
+          <span>CF</span>
+        </div>
 
-      <div>
-        <h1>CoreFlow</h1>
-        <p>Gestión Comercial Segura</p>
-      </div>
-    </a>
-
-    <button class="menu-toggle" type="button" (click)="cambiarMenu()">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-
-    <nav class="menu" [class.open]="menuAbierto">
-      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="cerrarMenu()">
-        Inicio
+        <div class="brand-text">
+          <h1>CoreFlow</h1>
+          <p>Gestión Comercial Segura</p>
+        </div>
       </a>
 
-      <a routerLink="/productos" routerLinkActive="active" (click)="cerrarMenu()">
-        Productos
-      </a>
+      <button
+        class="menu-toggle"
+        [class.open]="menuAbierto"
+        type="button"
+        aria-label="Abrir menú"
+        (click)="cambiarMenu()"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
 
-      <a routerLink="/pedidos" routerLinkActive="active" (click)="cerrarMenu()">
-        Pedidos
-      </a>
+      <nav class="nav-links" [class.open]="menuAbierto">
+        <a
+          routerLink="/"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          (click)="cerrarMenu()"
+        >
+          Inicio
+        </a>
 
-      <a *ngIf="!auth.estaAutenticado()" routerLink="/login" routerLinkActive="active" (click)="cerrarMenu()">
-        Login
-      </a>
+        <a routerLink="/productos" routerLinkActive="active" (click)="cerrarMenu()">
+          Productos
+        </a>
 
-      <a *ngIf="!auth.estaAutenticado()" routerLink="/registro" routerLinkActive="active" (click)="cerrarMenu()">
-        Registro
-      </a>
+        <a routerLink="/pedidos" routerLinkActive="active" (click)="cerrarMenu()">
+          Pedidos
+        </a>
 
-      <div *ngIf="auth.estaAutenticado()" class="session-box">
-        <span class="user-badge">
-          {{ auth.obtenerUsuario() }} · {{ auth.obtenerRol() }}
-        </span>
+        <a
+          *ngIf="!auth.estaAutenticado()"
+          routerLink="/login"
+          routerLinkActive="active"
+          (click)="cerrarMenu()"
+        >
+          Login
+        </a>
 
-        <button class="logout-btn" type="button" (click)="cerrarSesion()">
-          Cerrar sesión
-        </button>
-      </div>
-    </nav>
-  </div>
-</header>
+        <a
+          *ngIf="!auth.estaAutenticado()"
+          routerLink="/registro"
+          routerLinkActive="active"
+          (click)="cerrarMenu()"
+        >
+          Registro
+        </a>
 
-<main class="container">
-  <router-outlet></router-outlet>
-</main>
+        <div *ngIf="auth.estaAutenticado()" class="session-panel">
+          <div class="session-info">
+            <span class="session-avatar">
+              {{ auth.obtenerUsuario()?.charAt(0)?.toUpperCase() }}
+            </span>
 
-<footer class="footer">
-  <p>
-    CoreFlow API · Angular + Spring Boot + MySQL + JWT
-  </p>
-</footer>
+            <div>
+              <strong>{{ auth.obtenerUsuario() }}</strong>
+              <small>{{ auth.obtenerRol() }}</small>
+            </div>
+          </div>
+
+          <button class="logout-btn" type="button" (click)="cerrarSesion()">
+            Salir
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <div class="mobile-backdrop" [class.show]="menuAbierto" (click)="cerrarMenu()"></div>
+
+  <main class="main-container">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="footer">
+    <div>
+      <strong>CoreFlow</strong>
+      <span>Plataforma de gestión comercial segura</span>
+    </div>
+
+    <p>Control de productos, pedidos y operaciones administrativas</p>
+  </footer>
+</div>

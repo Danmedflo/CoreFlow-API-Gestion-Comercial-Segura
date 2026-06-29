@@ -22,9 +22,16 @@ export class Login {
   error = '';
   mensaje = '';
 
+  usarCredencialesAdmin(): void {
+    this.username = 'admin';
+    this.password = '123456';
+    this.error = '';
+    this.mensaje = '';
+  }
+
   onSubmit(form: NgForm): void {
     if (form.invalid) {
-      this.error = 'Completa usuario y contraseña.';
+      this.error = 'Completa correctamente usuario y contraseña.';
       return;
     }
 
@@ -38,15 +45,15 @@ export class Login {
     }).subscribe({
       next: (response) => {
         this.authService.guardarSesion(response);
-        this.mensaje = 'Inicio de sesión correcto.';
+        this.mensaje = 'Inicio de sesión correcto. Redirigiendo al panel...';
         this.cargando = false;
 
         setTimeout(() => {
           this.router.navigate(['/productos']);
-        }, 600);
+        }, 700);
       },
       error: () => {
-        this.error = 'Credenciales incorrectas. Verifica tu usuario y contraseña.';
+        this.error = 'Credenciales incorrectas. Verifica el usuario y la contraseña.';
         this.cargando = false;
       }
     });

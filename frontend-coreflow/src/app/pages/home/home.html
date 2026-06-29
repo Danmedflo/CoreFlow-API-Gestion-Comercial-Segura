@@ -1,25 +1,26 @@
 <section class="hero">
   <div class="hero-content">
-    <span class="tag">Sistema Comercial Seguro</span>
+    <span class="tag">Plataforma empresarial</span>
 
-    <h2>Bienvenido a CoreFlow</h2>
+    <h2>Administra tus operaciones comerciales con seguridad y control</h2>
 
     <p>
-      Plataforma web para la gestión de productos y pedidos comerciales,
-      integrada con Angular, Spring Boot, MySQL y seguridad mediante JWT.
+      CoreFlow centraliza la gestión de productos y pedidos en una interfaz moderna,
+      permitiendo consultar información comercial y restringir operaciones críticas
+      únicamente a usuarios autorizados.
     </p>
 
     <div class="hero-actions">
       <a routerLink="/productos" class="btn btn-primary">
-        Ver productos
+        Gestionar productos
       </a>
 
       <a routerLink="/pedidos" class="btn btn-secondary">
-        Ver pedidos
+        Gestionar pedidos
       </a>
 
       <a *ngIf="!auth.estaAutenticado()" routerLink="/login" class="btn btn-light">
-        Iniciar sesión
+        Acceder al sistema
       </a>
     </div>
   </div>
@@ -32,22 +33,28 @@
     </div>
 
     <div class="security-box">
-      <h3>Seguridad activa</h3>
-      <p>JWT + Control de roles</p>
+      <span class="panel-label">Control de acceso</span>
+
+      <h3>Operaciones protegidas</h3>
+
+      <p>
+        El sistema diferencia entre consultas generales y acciones administrativas
+        mediante autenticación y control de roles.
+      </p>
 
       <div class="security-item">
-        <span>Consulta pública</span>
-        <strong>GET</strong>
+        <span>Consulta de información</span>
+        <strong>Permitida</strong>
       </div>
 
       <div class="security-item">
-        <span>Acciones administrativas</span>
+        <span>Crear, editar y eliminar</span>
         <strong>ADMIN</strong>
       </div>
 
       <div class="security-item">
-        <span>Token enviado</span>
-        <strong>Bearer</strong>
+        <span>Sesión protegida</span>
+        <strong>Token JWT</strong>
       </div>
     </div>
   </div>
@@ -55,7 +62,7 @@
 
 <section class="stats">
   <div class="stat-card">
-    <span class="stat-icon">📦</span>
+    <span class="stat-icon">PR</span>
     <div>
       <h3>{{ cargando ? '...' : totalProductos }}</h3>
       <p>Productos registrados</p>
@@ -63,7 +70,7 @@
   </div>
 
   <div class="stat-card">
-    <span class="stat-icon">🧾</span>
+    <span class="stat-icon">PD</span>
     <div>
       <h3>{{ cargando ? '...' : totalPedidos }}</h3>
       <p>Pedidos registrados</p>
@@ -71,39 +78,42 @@
   </div>
 
   <div class="stat-card">
-    <span class="stat-icon">🔐</span>
+    <span class="stat-icon">AC</span>
     <div>
       <h3>{{ auth.estaAutenticado() ? auth.obtenerRol() : 'Invitado' }}</h3>
-      <p>Rol de sesión actual</p>
+      <p>Nivel de acceso actual</p>
     </div>
   </div>
 </section>
 
 <section class="features">
   <article class="feature-card">
+    <span class="feature-number">01</span>
     <h3>Gestión de productos</h3>
     <p>
-      Permite listar, buscar, crear, editar y eliminar productos comerciales.
-      Las acciones críticas están reservadas para usuarios administradores.
+      Registra, actualiza, consulta y controla el inventario comercial desde una
+      única pantalla de administración.
     </p>
-    <a routerLink="/productos">Ir a productos →</a>
+    <a routerLink="/productos">Ir a productos</a>
   </article>
 
   <article class="feature-card">
+    <span class="feature-number">02</span>
     <h3>Gestión de pedidos</h3>
     <p>
-      Permite administrar pedidos por cliente, fecha, total y estado,
-      manteniendo control de acceso mediante token JWT.
+      Supervisa pedidos por cliente, fecha, monto total y estado, manteniendo
+      trazabilidad en las operaciones.
     </p>
-    <a routerLink="/pedidos">Ir a pedidos →</a>
+    <a routerLink="/pedidos">Ir a pedidos</a>
   </article>
 
   <article class="feature-card">
-    <h3>Autenticación segura</h3>
+    <span class="feature-number">03</span>
+    <h3>Seguridad por roles</h3>
     <p>
-      El sistema usa login con usuario y contraseña. El backend genera un token
-      que Angular envía automáticamente en cada petición protegida.
+      Las acciones sensibles se restringen a perfiles administradores,
+      reforzando la seguridad de la información comercial.
     </p>
-    <a routerLink="/login">Iniciar sesión →</a>
+    <a routerLink="/login">Acceder al sistema</a>
   </article>
 </section>

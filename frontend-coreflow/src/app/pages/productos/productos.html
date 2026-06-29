@@ -1,50 +1,77 @@
-<section class="page-header">
+<section class="module-header">
   <div>
+    <span class="eyebrow">Módulo comercial</span>
     <h2>Gestión de Productos</h2>
-    <p>Listado, búsqueda y mantenimiento de productos del sistema comercial.</p>
+    <p>
+      Administra el catálogo comercial, controla stock, consulta categorías y ejecuta operaciones protegidas por rol.
+    </p>
   </div>
 
   <a *ngIf="auth.esAdmin()" routerLink="/productos/nuevo" class="btn btn-primary">
-    + Nuevo producto
+    Nuevo producto
   </a>
 </section>
 
-<section *ngIf="!auth.esAdmin()" class="notice">
-  Estás en modo consulta. Para crear, editar o eliminar productos debes iniciar sesión como ADMIN.
+<section class="summary-grid">
+  <article class="summary-card">
+    <span class="summary-label">Productos</span>
+    <strong>{{ productos.length }}</strong>
+    <p>Registros encontrados</p>
+  </article>
+
+  <article class="summary-card">
+    <span class="summary-label">Stock total</span>
+    <strong>{{ totalStock() }}</strong>
+    <p>Unidades disponibles</p>
+  </article>
+
+  <article class="summary-card">
+    <span class="summary-label">Valor estimado</span>
+    <strong>S/ {{ valorInventario() | number:'1.2-2' }}</strong>
+    <p>Inventario valorizado</p>
+  </article>
 </section>
 
-<section class="card">
-  <h3>Filtros de búsqueda</h3>
+<section *ngIf="!auth.esAdmin()" class="notice">
+  Modo consulta activo. Las operaciones de creación, edición y eliminación requieren una sesión con rol ADMIN.
+</section>
+
+<section class="panel">
+  <div class="panel-title">
+    <div>
+      <h3>Filtros de búsqueda</h3>
+      <p>Refina la información por nombre del producto o categoría comercial.</p>
+    </div>
+
+    <button class="btn btn-ghost" type="button" (click)="limpiarFiltros()">
+      Limpiar
+    </button>
+  </div>
 
   <div class="filters">
     <div class="field">
-      <label>Buscar por nombre</label>
+      <label>Nombre del producto</label>
       <input
         type="text"
-        placeholder="Ejemplo: Laptop"
+        placeholder="Buscar por nombre"
         [(ngModel)]="nombreBusqueda"
       />
-      <button class="btn btn-secondary" type="button" (click)="buscarPorNombre()">
+
+      <button class="btn btn-dark" type="button" (click)="buscarPorNombre()">
         Buscar nombre
       </button>
     </div>
 
     <div class="field">
-      <label>Buscar por categoría</label>
+      <label>Categoría</label>
       <input
         type="text"
-        placeholder="Ejemplo: Tecnología"
+        placeholder="Buscar por categoría"
         [(ngModel)]="categoriaBusqueda"
       />
-      <button class="btn btn-secondary" type="button" (click)="buscarPorCategoria()">
-        Buscar categoría
-      </button>
-    </div>
 
-    <div class="field field-actions">
-      <label>&nbsp;</label>
-      <button class="btn btn-light" type="button" (click)="limpiarFiltros()">
-        Limpiar filtros
+      <button class="btn btn-dark" type="button" (click)="buscarPorCategoria()">
+        Buscar categoría
       </button>
     </div>
   </div>
@@ -58,47 +85,81 @@
   {{ error }}
 </div>
 
-<section class="card">
-  <div class="table-header">
-    <h3>Productos registrados</h3>
-    <button class="btn btn-light" type="button" (click)="cargarProductos()">
+<section class="panel">
+  <div class="panel-title">
+    <div>
+      <h3>Catálogo de productos</h3>
+      <p>Listado actualizado de productos registrados en el sistema.</p>
+    </div>
+
+    <button class="btn btn-ghost" type="button" (click)="cargarProductos()">
       Actualizar
     </button>
   </div>
 
-  <p *ngIf="cargando">Cargando productos...</p>
+  <div *ngIf="cargando" class="loading">
+    Cargando información de productos...
+  </div>
 
-  <div *ngIf="!cargando && productos.length === 0" class="empty">
-    No hay productos registrados o no se encontraron resultados.
+  <div *ngIf="!cargando && productos.length === 0" class="empty-state">
+    <h3>No se encontraron productos</h3>
+    <p>No existen registros disponibles o los filtros aplicados no tienen coincidencias.</p>
   </div>
 
   <div class="table-container" *ngIf="!cargando && productos.length > 0">
     <table>
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Nombre</th>
+          <th>Producto</th>
           <th>Categoría</th>
           <th>Precio</th>
           <th>Stock</th>
+          <th>Estado</th>
           <th *ngIf="auth.esAdmin()">Acciones</th>
         </tr>
       </thead>
 
       <tbody>
         <tr *ngFor="let producto of productos">
-          <td>{{ producto.id }}</td>
-          <td>{{ producto.nombre }}</td>
-          <td>{{ producto.categoria }}</td>
-          <td>S/ {{ producto.precio | number:'1.2-2' }}</td>
-          <td>{{ producto.stock }}</td>
+          <td>
+            <div class="product-cell">
+              <div class="product-avatar">
+                {{ inicialProducto(producto.nombre) }}
+              </div>
+
+              <div>
+                <strong>{{ producto.nombre }}</strong>
+                <span>ID: {{ producto.id }}</span>
+              </div>
+            </div>
+          </td>
+
+          <td>
+            <span class="category-pill">
+              {{ producto.categoria }}
+            </span>
+          </td>
+
+          <td class="price">
+            S/ {{ producto.precio | number:'1.2-2' }}
+          </td>
+
+          <td>
+            {{ producto.stock }}
+          </td>
+
+          <td>
+            <span class="stock-pill" [ngClass]="stockClass(producto)">
+              {{ stockTexto(producto) }}
+            </span>
+          </td>
 
           <td class="actions" *ngIf="auth.esAdmin()">
             <a class="btn btn-edit" [routerLink]="['/productos/editar', producto.id]">
               Editar
             </a>
 
-            <button class="btn btn-danger" type="button" (click)="eliminarProducto(producto.id)">
+            <button class="btn btn-danger" type="button" (click)="abrirConfirmacionEliminar(producto)">
               Eliminar
             </button>
           </td>
@@ -107,3 +168,14 @@
     </table>
   </div>
 </section>
+
+<app-confirm-modal
+  [visible]="productoAEliminar !== null"
+  titulo="Eliminar producto"
+  mensaje="Esta acción eliminará el producto seleccionado del catálogo comercial."
+  [detalle]="'Producto: ' + (productoAEliminar?.nombre || '')"
+  textoCancelar="Cancelar"
+  textoConfirmar="Eliminar"
+  (cancelar)="cancelarEliminacion()"
+  (confirmar)="confirmarEliminacion()"
+></app-confirm-modal>

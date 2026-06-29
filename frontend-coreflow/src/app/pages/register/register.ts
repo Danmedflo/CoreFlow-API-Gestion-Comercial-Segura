@@ -44,14 +44,18 @@ export class Register {
       activo: true
     }).subscribe({
       next: () => {
-        this.mensaje = 'Usuario registrado correctamente. Ahora puedes iniciar sesión.';
+        this.mensaje = 'Usuario registrado correctamente. Ya puedes iniciar sesión.';
         this.cargando = false;
         form.resetForm();
       },
       error: () => {
-        this.error = 'No se pudo registrar el usuario. Puede que el nombre ya exista.';
+        this.error = 'No se pudo registrar el usuario. Puede que el nombre de usuario ya exista.';
         this.cargando = false;
       }
     });
+  }
+
+  passwordCoincide(): boolean {
+    return this.password === this.confirmarPassword;
   }
 }

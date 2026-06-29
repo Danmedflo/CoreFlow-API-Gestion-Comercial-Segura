@@ -1,15 +1,16 @@
-<section class="form-page">
-  <div class="form-card">
+<section class="form-layout">
+  <div class="form-main">
     <div class="form-header">
       <div>
-        <h2>{{ modoEdicion ? 'Editar producto' : 'Nuevo producto' }}</h2>
+        <span class="eyebrow">Mantenimiento de productos</span>
+        <h2>{{ modoEdicion ? 'Editar producto' : 'Registrar producto' }}</h2>
         <p>
-          {{ modoEdicion ? 'Actualiza los datos del producto seleccionado.' : 'Registra un nuevo producto comercial.' }}
+          {{ modoEdicion ? 'Actualiza la información comercial del producto seleccionado.' : 'Completa los datos necesarios para incorporar un nuevo producto al catálogo.' }}
         </p>
       </div>
 
       <a routerLink="/productos" class="btn btn-light">
-        Volver
+        Volver al listado
       </a>
     </div>
 
@@ -21,9 +22,18 @@
       {{ error }}
     </div>
 
-    <form *ngIf="auth.esAdmin()" #productoForm="ngForm" (ngSubmit)="guardarProducto(productoForm)">
+    <div *ngIf="cargando && modoEdicion" class="loading">
+      Cargando información del producto...
+    </div>
+
+    <form *ngIf="auth.esAdmin()" #productoForm="ngForm" (ngSubmit)="guardarProducto(productoForm)" class="business-form">
+      <div class="section-title">
+        <h3>Información general</h3>
+        <p>Datos principales para identificar el producto dentro del sistema.</p>
+      </div>
+
       <div class="grid">
-        <div class="field">
+        <div class="field field-wide">
           <label>Nombre del producto</label>
           <input
             type="text"
@@ -31,7 +41,7 @@
             [(ngModel)]="producto.nombre"
             required
             minlength="3"
-            placeholder="Ejemplo: Laptop Lenovo"
+            placeholder="Ejemplo: Laptop Lenovo ThinkPad"
             #nombreCtrl="ngModel"
           />
 
@@ -56,18 +66,28 @@
             La categoría es obligatoria.
           </small>
         </div>
+      </div>
 
+      <div class="section-title">
+        <h3>Información comercial</h3>
+        <p>Define precio, disponibilidad y valor estimado del inventario.</p>
+      </div>
+
+      <div class="grid">
         <div class="field">
-          <label>Precio</label>
-          <input
-            type="number"
-            name="precio"
-            [(ngModel)]="producto.precio"
-            required
-            min="0.1"
-            step="0.01"
-            #precioCtrl="ngModel"
-          />
+          <label>Precio unitario</label>
+          <div class="input-prefix">
+            <span>S/</span>
+            <input
+              type="number"
+              name="precio"
+              [(ngModel)]="producto.precio"
+              required
+              min="0.1"
+              step="0.01"
+              #precioCtrl="ngModel"
+            />
+          </div>
 
           <small *ngIf="precioCtrl.invalid && precioCtrl.touched">
             El precio debe ser mayor a 0.
@@ -75,7 +95,7 @@
         </div>
 
         <div class="field">
-          <label>Stock</label>
+          <label>Stock disponible</label>
           <input
             type="number"
             name="stock"
@@ -91,9 +111,9 @@
         </div>
       </div>
 
-      <div class="actions">
+      <div class="form-actions">
         <button class="btn btn-primary" type="submit" [disabled]="productoForm.invalid || cargando">
-          {{ cargando ? 'Guardando...' : 'Guardar producto' }}
+          {{ cargando ? 'Guardando...' : (modoEdicion ? 'Actualizar producto' : 'Registrar producto') }}
         </button>
 
         <a routerLink="/productos" class="btn btn-secondary">
@@ -102,4 +122,46 @@
       </div>
     </form>
   </div>
+
+  <aside class="preview-panel">
+    <div class="preview-card">
+      <span class="preview-label">Vista previa</span>
+
+      <div class="product-avatar">
+        {{ inicialProducto() }}
+      </div>
+
+      <h3>{{ producto.nombre || 'Nombre del producto' }}</h3>
+
+      <p>{{ producto.categoria || 'Categoría pendiente' }}</p>
+
+      <div class="preview-data">
+        <div>
+          <span>Precio</span>
+          <strong>S/ {{ producto.precio || 0 | number:'1.2-2' }}</strong>
+        </div>
+
+        <div>
+          <span>Stock</span>
+          <strong>{{ producto.stock || 0 }}</strong>
+        </div>
+
+        <div>
+          <span>Valor inventario</span>
+          <strong>S/ {{ valorInventario() | number:'1.2-2' }}</strong>
+        </div>
+      </div>
+
+      <span class="status-pill" [ngClass]="estadoStockClase()">
+        {{ estadoStockTexto() }}
+      </span>
+    </div>
+
+    <div class="help-card">
+      <h4>Control administrativo</h4>
+      <p>
+        Esta operación está protegida por autenticación JWT y requiere rol ADMIN.
+      </p>
+    </div>
+  </aside>
 </section>

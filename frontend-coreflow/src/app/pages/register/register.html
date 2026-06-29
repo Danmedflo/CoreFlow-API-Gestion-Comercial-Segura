@@ -1,11 +1,13 @@
-<section class="auth-page">
-  <div class="auth-card">
-    <div class="auth-header">
-      <span>Nuevo usuario</span>
-      <h2>Crear cuenta</h2>
+<section class="register-layout">
+  <div class="register-card">
+    <div class="card-header">
+      <span class="eyebrow">Alta de usuario</span>
+
+      <h2>Crear nueva cuenta</h2>
+
       <p>
-        Registra un usuario para acceder al sistema. Por seguridad, los nuevos
-        usuarios se crean con rol USER.
+        Registra un usuario para acceder al sistema. Por política de seguridad,
+        las cuentas nuevas se crean con permisos de consulta.
       </p>
     </div>
 
@@ -60,23 +62,55 @@
           [(ngModel)]="confirmarPassword"
           required
           minlength="6"
-          placeholder="Repite tu contraseña"
+          placeholder="Repite la contraseña"
           #confirmarCtrl="ngModel"
         />
 
         <small *ngIf="confirmarCtrl.invalid && confirmarCtrl.touched">
           Debes confirmar la contraseña.
         </small>
+
+        <small *ngIf="confirmarPassword && !passwordCoincide()" class="warning-text">
+          Las contraseñas deben coincidir.
+        </small>
       </div>
 
-      <button class="btn btn-primary" type="submit" [disabled]="registerForm.invalid || cargando">
-        {{ cargando ? 'Registrando...' : 'Registrar usuario' }}
+      <button class="btn btn-primary" type="submit" [disabled]="registerForm.invalid || cargando || !passwordCoincide()">
+        {{ cargando ? 'Registrando usuario...' : 'Crear cuenta' }}
       </button>
     </form>
 
-    <p class="login-link">
+    <p class="switch-link">
       ¿Ya tienes cuenta?
-      <a routerLink="/login">Inicia sesión</a>
+      <a routerLink="/login">Iniciar sesión</a>
     </p>
   </div>
+
+  <aside class="policy-panel">
+    <div class="panel-card">
+      <span class="panel-label">Política de acceso</span>
+
+      <h3>Rol inicial: USER</h3>
+
+      <p>
+        Los usuarios registrados desde esta pantalla no obtienen permisos
+        administrativos. Las acciones críticas permanecen reservadas al rol ADMIN.
+      </p>
+
+      <div class="policy-row">
+        <span>Consulta de productos</span>
+        <strong>Permitida</strong>
+      </div>
+
+      <div class="policy-row">
+        <span>Consulta de pedidos</span>
+        <strong>Permitida</strong>
+      </div>
+
+      <div class="policy-row blocked">
+        <span>Crear, editar y eliminar</span>
+        <strong>ADMIN</strong>
+      </div>
+    </div>
+  </aside>
 </section>

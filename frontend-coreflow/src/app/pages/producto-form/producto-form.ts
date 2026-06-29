@@ -70,7 +70,7 @@ export class ProductoForm implements OnInit {
     }
 
     if (form.invalid) {
-      this.error = 'Completa correctamente todos los campos.';
+      this.error = 'Completa correctamente todos los campos requeridos.';
       return;
     }
 
@@ -111,5 +111,37 @@ export class ProductoForm implements OnInit {
         this.cargando = false;
       }
     });
+  }
+
+  valorInventario(): number {
+    return Number(this.producto.precio || 0) * Number(this.producto.stock || 0);
+  }
+
+  estadoStockTexto(): string {
+    if (this.producto.stock <= 0) {
+      return 'Sin stock';
+    }
+
+    if (this.producto.stock <= 5) {
+      return 'Stock bajo';
+    }
+
+    return 'Disponible';
+  }
+
+  estadoStockClase(): string {
+    if (this.producto.stock <= 0) {
+      return 'status-danger';
+    }
+
+    if (this.producto.stock <= 5) {
+      return 'status-warning';
+    }
+
+    return 'status-success';
+  }
+
+  inicialProducto(): string {
+    return this.producto.nombre ? this.producto.nombre.charAt(0).toUpperCase() : 'P';
   }
 }
