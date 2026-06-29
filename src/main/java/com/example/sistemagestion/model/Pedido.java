@@ -19,6 +19,11 @@ public class Pedido {
     private double total;
     private String estado;
 
+    private Long productoId;
+    private String productoNombre;
+    private int cantidad;
+    private double precioUnitario;
+
     public Pedido() {
     }
 
@@ -68,5 +73,37 @@ public class Pedido {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public Long getProductoId() {
+        return productoId;
+    }
+
+    public void setProductoId(Long productoId) {
+        this.productoId = productoId;
+    }
+
+    public String getProductoNombre() {
+        return productoNombre;
+    }
+
+    public void setProductoNombre(String productoNombre) {
+        this.productoNombre = productoNombre;
+    }
+
+    public int getCantidad() {
+        return cantidad;
+    }
+
+    public void setCantidad(int cantidad) {
+        this.cantidad = cantidad;
+    }
+
+    public double getPrecioUnitario() {
+        return precioUnitario;
+    }
+
+    public void setPrecioUnitario(double precioUnitario) {
+        this.precioUnitario = precioUnitario;
     }
 }

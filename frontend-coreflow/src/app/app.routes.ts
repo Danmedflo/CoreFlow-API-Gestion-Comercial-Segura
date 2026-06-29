@@ -9,6 +9,8 @@ import { Pedidos } from './pages/pedidos/pedidos';
 import { PedidoForm } from './pages/pedido-form/pedido-form';
 import { NotFound } from './pages/not-found/not-found';
 
+import { adminGuard } from './guards/admin.guard';
+
 export const routes: Routes = [
   { path: '', component: Home, title: 'Inicio' },
 
@@ -16,12 +18,32 @@ export const routes: Routes = [
   { path: 'registro', component: Register, title: 'Registro' },
 
   { path: 'productos', component: Productos, title: 'Productos' },
-  { path: 'productos/nuevo', component: ProductoForm, title: 'Nuevo producto' },
-  { path: 'productos/editar/:id', component: ProductoForm, title: 'Editar producto' },
+  {
+    path: 'productos/nuevo',
+    component: ProductoForm,
+    title: 'Nuevo producto',
+    canActivate: [adminGuard]
+  },
+  {
+    path: 'productos/editar/:id',
+    component: ProductoForm,
+    title: 'Editar producto',
+    canActivate: [adminGuard]
+  },
 
   { path: 'pedidos', component: Pedidos, title: 'Pedidos' },
-  { path: 'pedidos/nuevo', component: PedidoForm, title: 'Nuevo pedido' },
-  { path: 'pedidos/editar/:id', component: PedidoForm, title: 'Editar pedido' },
+  {
+    path: 'pedidos/nuevo',
+    component: PedidoForm,
+    title: 'Nuevo pedido',
+    canActivate: [adminGuard]
+  },
+  {
+    path: 'pedidos/editar/:id',
+    component: PedidoForm,
+    title: 'Editar pedido',
+    canActivate: [adminGuard]
+  },
 
   { path: '**', component: NotFound, title: 'Página no encontrada' }
 ];

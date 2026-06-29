@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -31,23 +32,35 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .authorizeHttpRequests(auth -> auth
 
+                        // Preflight CORS
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
+                        // Autenticación pública
                         .requestMatchers("/api/auth/**").permitAll()
 
+                        // Consulta pública
                         .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/**").permitAll()
 
+                        // Compra: cualquier usuario autenticado puede generar pedido desde producto
+                        .requestMatchers(HttpMethod.POST, "/api/pedidos/comprar").authenticated()
+
+                        // Productos: solo ADMIN puede crear, editar o eliminar
                         .requestMatchers(HttpMethod.POST, "/api/productos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasRole("ADMIN")
 
+                        // Pedidos manuales: solo ADMIN puede crear, editar o eliminar
                         .requestMatchers(HttpMethod.POST, "/api/pedidos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/pedidos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/pedidos/**").hasRole("ADMIN")
 
+                        // Cualquier otra ruta requiere autenticación
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
