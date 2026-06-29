@@ -62,4 +62,8 @@ export class Auth {
     localStorage.removeItem('username');
     localStorage.removeItem('rol');
   }
+
+  esAdmin(): boolean {
+  return this.obtenerRol() === 'ADMIN';
+}
 }

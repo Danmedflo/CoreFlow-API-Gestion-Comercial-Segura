@@ -171,3 +171,13 @@ th {
     grid-template-columns: 1fr;
   }
 }
+
+.notice {
+  background: #eff6ff;
+  border-left: 5px solid #2563eb;
+  color: #1e3a8a;
+  padding: 14px 16px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  font-weight: 700;
+}

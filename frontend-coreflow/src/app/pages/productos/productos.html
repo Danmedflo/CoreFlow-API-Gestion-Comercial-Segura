@@ -4,9 +4,13 @@
     <p>Listado, búsqueda y mantenimiento de productos del sistema comercial.</p>
   </div>
 
-  <a routerLink="/productos/nuevo" class="btn btn-primary">
+  <a *ngIf="auth.esAdmin()" routerLink="/productos/nuevo" class="btn btn-primary">
     + Nuevo producto
   </a>
+</section>
+
+<section *ngIf="!auth.esAdmin()" class="notice">
+  Estás en modo consulta. Para crear, editar o eliminar productos debes iniciar sesión como ADMIN.
 </section>
 
 <section class="card">
@@ -77,7 +81,7 @@
           <th>Categoría</th>
           <th>Precio</th>
           <th>Stock</th>
-          <th>Acciones</th>
+          <th *ngIf="auth.esAdmin()">Acciones</th>
         </tr>
       </thead>
 
@@ -88,7 +92,8 @@
           <td>{{ producto.categoria }}</td>
           <td>S/ {{ producto.precio | number:'1.2-2' }}</td>
           <td>{{ producto.stock }}</td>
-          <td class="actions">
+
+          <td class="actions" *ngIf="auth.esAdmin()">
             <a class="btn btn-edit" [routerLink]="['/productos/editar', producto.id]">
               Editar
             </a>

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { Producto, ProductoModel } from '../../services/producto';
+import { Auth } from '../../services/auth';
 
 @Component({
   selector: 'app-productos',
@@ -13,6 +14,7 @@ import { Producto, ProductoModel } from '../../services/producto';
 })
 export class Productos implements OnInit {
   private productoService = inject(Producto);
+  auth = inject(Auth);
 
   productos: ProductoModel[] = [];
   nombreBusqueda = '';
@@ -37,7 +39,7 @@ export class Productos implements OnInit {
         this.cargando = false;
       },
       error: () => {
-        this.error = 'No se pudieron cargar los productos. Verifica que el backend esté ejecutándose en localhost:8080.';
+        this.error = 'No se pudieron cargar los productos. Verifica que el backend esté ejecutándose.';
         this.cargando = false;
       }
     });
@@ -102,6 +104,11 @@ export class Productos implements OnInit {
       return;
     }
 
+    if (!this.auth.esAdmin()) {
+      this.error = 'Solo un usuario ADMIN puede eliminar productos.';
+      return;
+    }
+
     const confirmar = confirm('¿Seguro que deseas eliminar este producto?');
 
     if (!confirmar) {
@@ -114,7 +121,7 @@ export class Productos implements OnInit {
         this.cargarProductos();
       },
       error: () => {
-        this.error = 'No se pudo eliminar el producto.';
+        this.error = 'No se pudo eliminar el producto. Verifica que hayas iniciado sesión como ADMIN.';
       }
     });
   }

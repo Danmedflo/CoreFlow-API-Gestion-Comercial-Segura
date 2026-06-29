@@ -1,1 +1,105 @@
-<p>producto-form works!</p>
+<section class="form-page">
+  <div class="form-card">
+    <div class="form-header">
+      <div>
+        <h2>{{ modoEdicion ? 'Editar producto' : 'Nuevo producto' }}</h2>
+        <p>
+          {{ modoEdicion ? 'Actualiza los datos del producto seleccionado.' : 'Registra un nuevo producto comercial.' }}
+        </p>
+      </div>
+
+      <a routerLink="/productos" class="btn btn-light">
+        Volver
+      </a>
+    </div>
+
+    <div *ngIf="mensaje" class="alert success">
+      {{ mensaje }}
+    </div>
+
+    <div *ngIf="error" class="alert error">
+      {{ error }}
+    </div>
+
+    <form *ngIf="auth.esAdmin()" #productoForm="ngForm" (ngSubmit)="guardarProducto(productoForm)">
+      <div class="grid">
+        <div class="field">
+          <label>Nombre del producto</label>
+          <input
+            type="text"
+            name="nombre"
+            [(ngModel)]="producto.nombre"
+            required
+            minlength="3"
+            placeholder="Ejemplo: Laptop Lenovo"
+            #nombreCtrl="ngModel"
+          />
+
+          <small *ngIf="nombreCtrl.invalid && nombreCtrl.touched">
+            El nombre es obligatorio y debe tener mínimo 3 caracteres.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Categoría</label>
+          <input
+            type="text"
+            name="categoria"
+            [(ngModel)]="producto.categoria"
+            required
+            minlength="3"
+            placeholder="Ejemplo: Tecnología"
+            #categoriaCtrl="ngModel"
+          />
+
+          <small *ngIf="categoriaCtrl.invalid && categoriaCtrl.touched">
+            La categoría es obligatoria.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Precio</label>
+          <input
+            type="number"
+            name="precio"
+            [(ngModel)]="producto.precio"
+            required
+            min="0.1"
+            step="0.01"
+            #precioCtrl="ngModel"
+          />
+
+          <small *ngIf="precioCtrl.invalid && precioCtrl.touched">
+            El precio debe ser mayor a 0.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Stock</label>
+          <input
+            type="number"
+            name="stock"
+            [(ngModel)]="producto.stock"
+            required
+            min="0"
+            #stockCtrl="ngModel"
+          />
+
+          <small *ngIf="stockCtrl.invalid && stockCtrl.touched">
+            El stock no puede ser negativo.
+          </small>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" type="submit" [disabled]="productoForm.invalid || cargando">
+          {{ cargando ? 'Guardando...' : 'Guardar producto' }}
+        </button>
+
+        <a routerLink="/productos" class="btn btn-secondary">
+          Cancelar
+        </a>
+      </div>
+    </form>
+  </div>
+</section>
