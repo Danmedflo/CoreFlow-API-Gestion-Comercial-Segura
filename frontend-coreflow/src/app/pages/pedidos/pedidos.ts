@@ -36,13 +36,20 @@ export class Pedidos implements OnInit {
     this.mensaje = '';
     this.error = '';
 
-    this.pedidoService.listar().subscribe({
+    const solicitud = this.auth.esAdmin()
+      ? this.pedidoService.listar()
+      : this.pedidoService.misPedidos();
+
+    solicitud.subscribe({
       next: (data) => {
         this.pedidos = data;
         this.cargando = false;
       },
       error: () => {
-        this.error = 'No se pudieron cargar los pedidos. Verifica que el backend esté ejecutándose.';
+        this.error = this.auth.esAdmin()
+          ? 'No se pudieron cargar los pedidos del sistema.'
+          : 'No se pudieron cargar tus pedidos. Verifica tu sesión.';
+
         this.cargando = false;
       }
     });
@@ -53,6 +60,13 @@ export class Pedidos implements OnInit {
 
     if (!cliente) {
       this.cargarPedidos();
+      return;
+    }
+
+    if (!this.auth.esAdmin()) {
+      this.pedidos = this.pedidos.filter(pedido =>
+        pedido.cliente.toLowerCase().includes(cliente.toLowerCase())
+      );
       return;
     }
 
@@ -77,6 +91,13 @@ export class Pedidos implements OnInit {
 
     if (!estado) {
       this.cargarPedidos();
+      return;
+    }
+
+    if (!this.auth.esAdmin()) {
+      this.pedidos = this.pedidos.filter(pedido =>
+        pedido.estado.toLowerCase() === estado.toLowerCase()
+      );
       return;
     }
 

@@ -32,6 +32,10 @@ export class Pedido {
     return this.http.get<PedidoModel[]>(this.apiUrl);
   }
 
+  misPedidos(): Observable<PedidoModel[]> {
+    return this.http.get<PedidoModel[]>(`${this.apiUrl}/mis-pedidos`);
+  }
+
   obtenerPorId(id: number): Observable<PedidoModel> {
     return this.http.get<PedidoModel>(`${this.apiUrl}/${id}`);
   }

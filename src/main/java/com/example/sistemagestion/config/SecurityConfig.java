@@ -40,15 +40,20 @@ public class SecurityConfig {
                         // Preflight CORS
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // Autenticación pública
+                        // Rutas públicas de autenticación
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // Consulta pública
+                        // Productos visibles para todos
                         .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/pedidos/**").permitAll()
 
-                        // Compra: cualquier usuario autenticado puede generar pedido desde producto
+                        // Comprar producto: cualquier usuario logeado puede generar pedido
                         .requestMatchers(HttpMethod.POST, "/api/pedidos/comprar").authenticated()
+
+                        // Mis pedidos: usuario logeado ve solo sus pedidos
+                        .requestMatchers(HttpMethod.GET, "/api/pedidos/mis-pedidos").authenticated()
+
+                        // Pedidos generales: solo ADMIN puede ver todos
+                        .requestMatchers(HttpMethod.GET, "/api/pedidos/**").hasRole("ADMIN")
 
                         // Productos: solo ADMIN puede crear, editar o eliminar
                         .requestMatchers(HttpMethod.POST, "/api/productos/**").hasRole("ADMIN")

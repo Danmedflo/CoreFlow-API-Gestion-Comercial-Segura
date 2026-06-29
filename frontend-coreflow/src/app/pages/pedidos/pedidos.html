@@ -1,9 +1,15 @@
 <section class="module-header">
   <div>
     <span class="eyebrow">Módulo operativo</span>
-    <h2>Gestión de Pedidos</h2>
+
+    <h2>{{ auth.esAdmin() ? 'Gestión de Pedidos' : 'Mis Pedidos' }}</h2>
+
     <p>
-      Supervisa pedidos comerciales, controla estados, consulta clientes y administra operaciones protegidas.
+      {{
+        auth.esAdmin()
+          ? 'Supervisa pedidos comerciales, controla estados, consulta clientes y administra operaciones protegidas.'
+          : 'Consulta el historial de pedidos generados desde tus compras de productos.'
+      }}
     </p>
   </div>
 
@@ -39,14 +45,20 @@
 </section>
 
 <section *ngIf="!auth.esAdmin()" class="notice">
-  Modo consulta activo. Las operaciones de creación, edición y eliminación requieren una sesión con rol ADMIN.
+  Estás visualizando únicamente los pedidos asociados a tu usuario.
 </section>
 
 <section class="panel">
   <div class="panel-title">
     <div>
       <h3>Filtros de búsqueda</h3>
-      <p>Consulta pedidos por cliente o por estado operativo.</p>
+      <p>
+        {{
+          auth.esAdmin()
+            ? 'Consulta pedidos por cliente o por estado operativo.'
+            : 'Filtra tus pedidos por cliente o por estado.'
+        }}
+      </p>
     </div>
 
     <button class="btn btn-ghost" type="button" (click)="limpiarFiltros()">
@@ -70,6 +82,7 @@
 
     <div class="field">
       <label>Estado</label>
+
       <select [(ngModel)]="estadoBusqueda">
         <option value="">Seleccionar estado</option>
         <option value="PENDIENTE">PENDIENTE</option>
@@ -96,8 +109,15 @@
 <section class="panel">
   <div class="panel-title">
     <div>
-      <h3>Registro de pedidos</h3>
-      <p>Listado actualizado de pedidos almacenados en el sistema.</p>
+      <h3>{{ auth.esAdmin() ? 'Registro de pedidos' : 'Historial de compras' }}</h3>
+
+      <p>
+        {{
+          auth.esAdmin()
+            ? 'Listado actualizado de pedidos almacenados en el sistema.'
+            : 'Listado de pedidos generados desde tus compras.'
+        }}
+      </p>
     </div>
 
     <button class="btn btn-ghost" type="button" (click)="cargarPedidos()">
@@ -146,8 +166,14 @@
           <td>
             <div class="order-product">
               <strong>{{ pedido.productoNombre || 'Pedido manual' }}</strong>
-              <span *ngIf="pedido.precioUnitario">Precio unitario: S/ {{ pedido.precioUnitario | number:'1.2-2' }}</span>
-              <span *ngIf="!pedido.precioUnitario">Sin producto vinculado</span>
+
+              <span *ngIf="pedido.precioUnitario">
+                Precio unitario: S/ {{ pedido.precioUnitario | number:'1.2-2' }}
+              </span>
+
+              <span *ngIf="!pedido.precioUnitario">
+                Sin producto vinculado
+              </span>
             </div>
           </td>
 

@@ -10,4 +10,6 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     List<Pedido> findByEstadoIgnoreCase(String estado);
 
     List<Pedido> findByClienteContainingIgnoreCase(String cliente);
+
+    List<Pedido> findByClienteIgnoreCase(String cliente);
 }

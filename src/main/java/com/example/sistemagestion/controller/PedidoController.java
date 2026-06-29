@@ -9,6 +9,8 @@ import com.example.sistemagestion.repository.ProductoRepository;
 import jakarta.transaction.Transactional;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -34,6 +36,20 @@ public class PedidoController {
         return ResponseEntity.ok(pedidoRepository.findAll());
     }
 
+    @GetMapping("/mis-pedidos")
+    public ResponseEntity<?> listarMisPedidos() {
+        String usuarioActual = obtenerUsuarioActual();
+
+        if (usuarioActual == null) {
+            return ResponseEntity.status(401)
+                    .body(Map.of("mensaje", "Usuario no autenticado"));
+        }
+
+        List<Pedido> pedidos = pedidoRepository.findByClienteIgnoreCase(usuarioActual);
+
+        return ResponseEntity.ok(pedidos);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerPorId(@PathVariable Long id) {
         Optional<Pedido> pedido = pedidoRepository.findById(id);
@@ -55,9 +71,11 @@ public class PedidoController {
     @Transactional
     @PostMapping("/comprar")
     public ResponseEntity<?> comprarProducto(@RequestBody ComprarPedidoRequest request) {
-        if (request.getCliente() == null || request.getCliente().trim().isEmpty()) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("mensaje", "El cliente es obligatorio"));
+        String usuarioActual = obtenerUsuarioActual();
+
+        if (usuarioActual == null) {
+            return ResponseEntity.status(401)
+                    .body(Map.of("mensaje", "Usuario no autenticado"));
         }
 
         if (request.getProductoId() == null) {
@@ -88,7 +106,7 @@ public class PedidoController {
         productoRepository.save(producto);
 
         Pedido pedido = new Pedido();
-        pedido.setCliente(request.getCliente().trim());
+        pedido.setCliente(usuarioActual);
         pedido.setFecha(LocalDate.now().toString());
         pedido.setEstado("PENDIENTE");
 
@@ -149,5 +167,21 @@ public class PedidoController {
     @GetMapping("/buscar")
     public ResponseEntity<List<Pedido>> buscarPorCliente(@RequestParam String cliente) {
         return ResponseEntity.ok(pedidoRepository.findByClienteContainingIgnoreCase(cliente));
+    }
+
+    private String obtenerUsuarioActual() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+
+        String username = authentication.getName();
+
+        if (username == null || username.equals("anonymousUser")) {
+            return null;
+        }
+
+        return username;
     }
 }
