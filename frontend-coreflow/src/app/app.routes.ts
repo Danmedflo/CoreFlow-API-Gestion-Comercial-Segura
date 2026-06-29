@@ -8,6 +8,7 @@ import { ProductoForm } from './pages/producto-form/producto-form';
 import { Pedidos } from './pages/pedidos/pedidos';
 import { PedidoForm } from './pages/pedido-form/pedido-form';
 import { ComprarPedido } from './pages/comprar-pedido/comprar-pedido';
+import { PerfilPage } from './pages/perfil/perfil';
 import { NotFound } from './pages/not-found/not-found';
 
 import { adminGuard } from './guards/admin.guard';
@@ -56,6 +57,12 @@ export const routes: Routes = [
     component: PedidoForm,
     title: 'Editar pedido',
     canActivate: [adminGuard]
+  },
+  {
+    path: 'perfil',
+    component: PerfilPage,
+    title: 'Editar perfil',
+    canActivate: [authGuard]
   },
 
   { path: '**', component: NotFound, title: 'Página no encontrada' }

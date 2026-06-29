@@ -1,0 +1,157 @@
+<section class="profile-layout">
+  <div class="profile-main">
+    <div class="profile-header">
+      <div>
+        <span class="eyebrow">Cuenta de usuario</span>
+
+        <h2>Editar perfil</h2>
+
+        <p>
+          Actualiza tu nombre visible y administra la contraseña de acceso al sistema.
+        </p>
+      </div>
+
+      <a routerLink="/productos" class="btn btn-light">
+        Volver al catálogo
+      </a>
+    </div>
+
+    <div *ngIf="mensaje" class="alert success">
+      {{ mensaje }}
+    </div>
+
+    <div *ngIf="error" class="alert error">
+      {{ error }}
+    </div>
+
+    <div *ngIf="cargando" class="loading">
+      Cargando perfil...
+    </div>
+
+    <form
+      *ngIf="!cargando"
+      #perfilForm="ngForm"
+      class="business-form"
+      (ngSubmit)="guardarPerfil(perfilForm)"
+    >
+      <div class="section-title">
+        <h3>Información personal</h3>
+        <p>Este nombre se mostrará en la barra superior del sistema.</p>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label>Usuario</label>
+
+          <input
+            type="text"
+            name="username"
+            [(ngModel)]="perfil.username"
+            disabled
+          />
+
+          <small class="info-text">
+            El usuario no se modifica porque está asociado a tus pedidos.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Nombre visible</label>
+
+          <input
+            type="text"
+            name="nombreCompleto"
+            [(ngModel)]="perfil.nombreCompleto"
+            required
+            minlength="3"
+            placeholder="Ejemplo: Daniel"
+            #nombreCtrl="ngModel"
+          />
+
+          <small *ngIf="nombreCtrl.invalid && nombreCtrl.touched">
+            El nombre visible debe tener mínimo 3 caracteres.
+          </small>
+        </div>
+      </div>
+
+      <div class="section-title">
+        <h3>Seguridad</h3>
+        <p>Completa estos campos solo si deseas cambiar tu contraseña.</p>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label>Nueva contraseña</label>
+
+          <input
+            type="password"
+            name="nuevaPassword"
+            [(ngModel)]="nuevaPassword"
+            minlength="6"
+            placeholder="Mínimo 6 caracteres"
+            #passwordCtrl="ngModel"
+          />
+
+          <small *ngIf="passwordCtrl.invalid && passwordCtrl.touched">
+            La contraseña debe tener mínimo 6 caracteres.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Confirmar contraseña</label>
+
+          <input
+            type="password"
+            name="confirmarPassword"
+            [(ngModel)]="confirmarPassword"
+            placeholder="Repite la nueva contraseña"
+          />
+
+          <small *ngIf="nuevaPassword && confirmarPassword && nuevaPassword !== confirmarPassword">
+            Las contraseñas no coinciden.
+          </small>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button
+          class="btn btn-primary"
+          type="submit"
+          [disabled]="perfilForm.invalid || guardando || !!(nuevaPassword && nuevaPassword !== confirmarPassword)"
+        >
+          {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+
+        <a routerLink="/productos" class="btn btn-secondary">
+          Cancelar
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <aside class="profile-card">
+    <div class="profile-avatar">
+      {{ inicialUsuario() }}
+    </div>
+
+    <h3>{{ perfil.nombreCompleto || 'Usuario' }}</h3>
+
+    <p>{{ perfil.username }}</p>
+
+    <span class="role-badge">
+      {{ perfil.rol }}
+    </span>
+
+    <div class="profile-info">
+      <div>
+        <span>Estado</span>
+        <strong>{{ perfil.activo ? 'Activo' : 'Inactivo' }}</strong>
+      </div>
+
+      <div>
+        <span>Acceso</span>
+        <strong>{{ perfil.rol === 'ADMIN' ? 'Administrativo' : 'Usuario' }}</strong>
+      </div>
+    </div>
+  </aside>
+</section>

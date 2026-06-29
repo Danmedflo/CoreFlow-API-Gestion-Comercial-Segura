@@ -1,7 +1,7 @@
 <div class="app-shell">
   <header class="topbar">
     <div class="topbar-inner">
-      <a routerLink="/" class="brand" (click)="cerrarMenu()">
+      <a routerLink="/" class="brand" (click)="cerrarMenu(); cerrarUserMenu()">
         <div class="brand-logo">
           <span>CF</span>
         </div>
@@ -29,7 +29,7 @@
           routerLink="/"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
-          (click)="cerrarMenu()"
+          (click)="cerrarMenu(); cerrarUserMenu()"
         >
           Inicio
         </a>
@@ -37,7 +37,7 @@
         <a
           routerLink="/productos"
           routerLinkActive="active"
-          (click)="cerrarMenu()"
+          (click)="cerrarMenu(); cerrarUserMenu()"
         >
           Productos
         </a>
@@ -46,7 +46,7 @@
           *ngIf="auth.estaAutenticado()"
           routerLink="/pedidos"
           routerLinkActive="active"
-          (click)="cerrarMenu()"
+          (click)="cerrarMenu(); cerrarUserMenu()"
         >
           {{ auth.esAdmin() ? 'Pedidos' : 'Mis pedidos' }}
         </a>
@@ -55,7 +55,7 @@
           *ngIf="!auth.estaAutenticado()"
           routerLink="/login"
           routerLinkActive="active"
-          (click)="cerrarMenu()"
+          (click)="cerrarMenu(); cerrarUserMenu()"
         >
           Login
         </a>
@@ -64,26 +64,63 @@
           *ngIf="!auth.estaAutenticado()"
           routerLink="/registro"
           routerLinkActive="active"
-          (click)="cerrarMenu()"
+          (click)="cerrarMenu(); cerrarUserMenu()"
         >
           Registro
         </a>
 
-        <div *ngIf="auth.estaAutenticado()" class="session-panel">
-          <div class="session-info">
-            <span class="session-avatar">
-              {{ auth.obtenerUsuario()?.charAt(0)?.toUpperCase() }}
+        <div *ngIf="auth.estaAutenticado()" class="user-menu-wrapper">
+          <button
+            class="user-menu-trigger"
+            type="button"
+            [class.open]="userMenuAbierto"
+            (click)="cambiarUserMenu()"
+          >
+            <span class="user-avatar">
+              {{ inicialUsuario() }}
             </span>
 
-            <div>
-              <strong>{{ auth.obtenerUsuario() }}</strong>
-              <small>{{ auth.obtenerRol() }}</small>
-            </div>
-          </div>
+            <span class="user-name">
+              {{ nombreVisible() }}
+            </span>
 
-          <button class="logout-btn" type="button" (click)="cerrarSesion()">
-            Salir
+            <span class="user-chevron">
+              ▾
+            </span>
           </button>
+
+          <div class="user-dropdown" *ngIf="userMenuAbierto">
+            <div class="dropdown-header">
+              <span class="dropdown-avatar">
+                {{ inicialUsuario() }}
+              </span>
+
+              <div>
+                <strong>{{ nombreVisible() }}</strong>
+                <small>{{ auth.obtenerUsuario() }}</small>
+                <span>{{ auth.obtenerRol() }}</span>
+              </div>
+            </div>
+
+            <div class="dropdown-section">
+              <a
+                routerLink="/perfil"
+                class="dropdown-item"
+                (click)="cerrarUserMenu(); cerrarMenu()"
+              >
+                <span>Editar perfil</span>
+              </a>
+
+              <button type="button" class="dropdown-item disabled">
+                <span>Preferencias</span>
+                <small>Próximamente</small>
+              </button>
+            </div>
+
+            <button type="button" class="dropdown-item logout-item" (click)="cerrarSesion()">
+              Salir
+            </button>
+          </div>
         </div>
       </nav>
     </div>
@@ -92,7 +129,13 @@
   <div
     class="mobile-backdrop"
     [class.show]="menuAbierto"
-    (click)="cerrarMenu()"
+    (click)="cerrarMenu(); cerrarUserMenu()"
+  ></div>
+
+  <div
+    class="user-backdrop"
+    *ngIf="userMenuAbierto"
+    (click)="cerrarUserMenu()"
   ></div>
 
   <main class="main-container">

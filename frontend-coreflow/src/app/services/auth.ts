@@ -1,5 +1,5 @@
-import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 export interface AuthRequest {
@@ -16,7 +16,7 @@ export interface AuthResponse {
 export interface RegistroUsuario {
   username: string;
   password: string;
-  rol: string;
+  rol?: string;
   activo?: boolean;
 }
 
@@ -27,12 +27,12 @@ export class Auth {
   private http = inject(HttpClient);
   private apiUrl = 'http://localhost:8080/api/auth';
 
-  login(data: AuthRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, data);
+  login(request: AuthRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, request);
   }
 
   register(usuario: RegistroUsuario): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/register`, usuario);
+    return this.http.post(`${this.apiUrl}/register`, usuario);
   }
 
   guardarSesion(response: AuthResponse): void {
@@ -57,13 +57,26 @@ export class Auth {
     return !!this.obtenerToken();
   }
 
+  esAdmin(): boolean {
+    return this.obtenerRol() === 'ADMIN';
+  }
+
+  guardarNombrePerfil(nombre: string): void {
+    localStorage.setItem('nombreCompleto', nombre);
+  }
+
+  obtenerNombrePerfil(): string | null {
+    return localStorage.getItem('nombreCompleto');
+  }
+
+  limpiarNombrePerfil(): void {
+    localStorage.removeItem('nombreCompleto');
+  }
+
   cerrarSesion(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
     localStorage.removeItem('rol');
+    localStorage.removeItem('nombreCompleto');
   }
-
-  esAdmin(): boolean {
-  return this.obtenerRol() === 'ADMIN';
-}
 }
