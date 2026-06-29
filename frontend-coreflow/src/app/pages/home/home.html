@@ -1,1 +1,109 @@
-<p>home works!</p>
+<section class="hero">
+  <div class="hero-content">
+    <span class="tag">Sistema Comercial Seguro</span>
+
+    <h2>Bienvenido a CoreFlow</h2>
+
+    <p>
+      Plataforma web para la gestión de productos y pedidos comerciales,
+      integrada con Angular, Spring Boot, MySQL y seguridad mediante JWT.
+    </p>
+
+    <div class="hero-actions">
+      <a routerLink="/productos" class="btn btn-primary">
+        Ver productos
+      </a>
+
+      <a routerLink="/pedidos" class="btn btn-secondary">
+        Ver pedidos
+      </a>
+
+      <a *ngIf="!auth.estaAutenticado()" routerLink="/login" class="btn btn-light">
+        Iniciar sesión
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-panel">
+    <div class="panel-header">
+      <div class="circle"></div>
+      <div class="circle"></div>
+      <div class="circle"></div>
+    </div>
+
+    <div class="security-box">
+      <h3>Seguridad activa</h3>
+      <p>JWT + Control de roles</p>
+
+      <div class="security-item">
+        <span>Consulta pública</span>
+        <strong>GET</strong>
+      </div>
+
+      <div class="security-item">
+        <span>Acciones administrativas</span>
+        <strong>ADMIN</strong>
+      </div>
+
+      <div class="security-item">
+        <span>Token enviado</span>
+        <strong>Bearer</strong>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="stat-card">
+    <span class="stat-icon">📦</span>
+    <div>
+      <h3>{{ cargando ? '...' : totalProductos }}</h3>
+      <p>Productos registrados</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <span class="stat-icon">🧾</span>
+    <div>
+      <h3>{{ cargando ? '...' : totalPedidos }}</h3>
+      <p>Pedidos registrados</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <span class="stat-icon">🔐</span>
+    <div>
+      <h3>{{ auth.estaAutenticado() ? auth.obtenerRol() : 'Invitado' }}</h3>
+      <p>Rol de sesión actual</p>
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  <article class="feature-card">
+    <h3>Gestión de productos</h3>
+    <p>
+      Permite listar, buscar, crear, editar y eliminar productos comerciales.
+      Las acciones críticas están reservadas para usuarios administradores.
+    </p>
+    <a routerLink="/productos">Ir a productos →</a>
+  </article>
+
+  <article class="feature-card">
+    <h3>Gestión de pedidos</h3>
+    <p>
+      Permite administrar pedidos por cliente, fecha, total y estado,
+      manteniendo control de acceso mediante token JWT.
+    </p>
+    <a routerLink="/pedidos">Ir a pedidos →</a>
+  </article>
+
+  <article class="feature-card">
+    <h3>Autenticación segura</h3>
+    <p>
+      El sistema usa login con usuario y contraseña. El backend genera un token
+      que Angular envía automáticamente en cada petición protegida.
+    </p>
+    <a routerLink="/login">Iniciar sesión →</a>
+  </article>
+</section>

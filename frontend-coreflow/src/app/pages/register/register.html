@@ -1,1 +1,82 @@
-<p>register works!</p>
+<section class="auth-page">
+  <div class="auth-card">
+    <div class="auth-header">
+      <span>Nuevo usuario</span>
+      <h2>Crear cuenta</h2>
+      <p>
+        Registra un usuario para acceder al sistema. Por seguridad, los nuevos
+        usuarios se crean con rol USER.
+      </p>
+    </div>
+
+    <div *ngIf="mensaje" class="alert success">
+      {{ mensaje }}
+    </div>
+
+    <div *ngIf="error" class="alert error">
+      {{ error }}
+    </div>
+
+    <form #registerForm="ngForm" (ngSubmit)="onSubmit(registerForm)">
+      <div class="field">
+        <label>Usuario</label>
+        <input
+          type="text"
+          name="username"
+          [(ngModel)]="username"
+          required
+          minlength="3"
+          placeholder="Ejemplo: usuario01"
+          #usernameCtrl="ngModel"
+        />
+
+        <small *ngIf="usernameCtrl.invalid && usernameCtrl.touched">
+          El usuario es obligatorio y debe tener mínimo 3 caracteres.
+        </small>
+      </div>
+
+      <div class="field">
+        <label>Contraseña</label>
+        <input
+          type="password"
+          name="password"
+          [(ngModel)]="password"
+          required
+          minlength="6"
+          placeholder="Mínimo 6 caracteres"
+          #passwordCtrl="ngModel"
+        />
+
+        <small *ngIf="passwordCtrl.invalid && passwordCtrl.touched">
+          La contraseña debe tener mínimo 6 caracteres.
+        </small>
+      </div>
+
+      <div class="field">
+        <label>Confirmar contraseña</label>
+        <input
+          type="password"
+          name="confirmarPassword"
+          [(ngModel)]="confirmarPassword"
+          required
+          minlength="6"
+          placeholder="Repite tu contraseña"
+          #confirmarCtrl="ngModel"
+        />
+
+        <small *ngIf="confirmarCtrl.invalid && confirmarCtrl.touched">
+          Debes confirmar la contraseña.
+        </small>
+      </div>
+
+      <button class="btn btn-primary" type="submit" [disabled]="registerForm.invalid || cargando">
+        {{ cargando ? 'Registrando...' : 'Registrar usuario' }}
+      </button>
+    </form>
+
+    <p class="login-link">
+      ¿Ya tienes cuenta?
+      <a routerLink="/login">Inicia sesión</a>
+    </p>
+  </div>
+</section>
