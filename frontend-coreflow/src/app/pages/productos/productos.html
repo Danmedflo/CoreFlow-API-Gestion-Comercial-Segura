@@ -115,7 +115,7 @@
           <th>Precio</th>
           <th>Stock</th>
           <th>Estado</th>
-          <th *ngIf="auth.esAdmin()">Acciones</th>
+          <th *ngIf="auth.estaAutenticado()">Acciones</th>
         </tr>
       </thead>
 
@@ -154,12 +154,33 @@
             </span>
           </td>
 
-          <td class="actions" *ngIf="auth.esAdmin()">
-            <a class="btn btn-edit" [routerLink]="['/productos/editar', producto.id]">
+          <td class="actions" *ngIf="auth.estaAutenticado()">
+            <a
+              *ngIf="producto.stock > 0"
+              class="btn btn-buy"
+              [routerLink]="['/pedidos/comprar', producto.id]"
+            >
+              Comprar
+            </a>
+
+            <span *ngIf="producto.stock <= 0" class="unavailable-label">
+              Sin stock
+            </span>
+
+            <a
+              *ngIf="auth.esAdmin()"
+              class="btn btn-edit"
+              [routerLink]="['/productos/editar', producto.id]"
+            >
               Editar
             </a>
 
-            <button class="btn btn-danger" type="button" (click)="abrirConfirmacionEliminar(producto)">
+            <button
+              *ngIf="auth.esAdmin()"
+              class="btn btn-danger"
+              type="button"
+              (click)="abrirConfirmacionEliminar(producto)"
+            >
               Eliminar
             </button>
           </td>

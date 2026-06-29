@@ -11,6 +11,9 @@ import { NotFound } from './pages/not-found/not-found';
 
 import { adminGuard } from './guards/admin.guard';
 
+import { ComprarPedido } from './pages/comprar-pedido/comprar-pedido';
+import { authGuard } from './guards/auth.guard';
+
 export const routes: Routes = [
   { path: '', component: Home, title: 'Inicio' },
 
@@ -32,6 +35,12 @@ export const routes: Routes = [
   },
 
   { path: 'pedidos', component: Pedidos, title: 'Pedidos' },
+  {
+    path: 'pedidos/comprar/:productoId',
+    component: ComprarPedido,
+    title: 'Comprar producto',
+    canActivate: [authGuard]
+  },
   {
     path: 'pedidos/nuevo',
     component: PedidoForm,

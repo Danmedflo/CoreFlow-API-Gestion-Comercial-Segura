@@ -370,3 +370,26 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
 }
+
+.order-product strong {
+  display: block;
+  color: #0f172a;
+}
+
+.order-product span {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 800;
+}
+
+.quantity-pill {
+  display: inline-block;
+  background: #eff6ff;
+  color: #1d4ed8;
+  padding: 7px 11px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 12px;
+}

@@ -357,3 +357,19 @@ tbody tr:hover {
     width: 100%;
   }
 }
+
+.btn-buy {
+  background: #16a34a;
+  color: white;
+  box-shadow: 0 10px 24px rgba(22, 163, 74, 0.18);
+}
+
+.unavailable-label {
+  display: inline-block;
+  background: #f1f5f9;
+  color: #64748b;
+  border-radius: 12px;
+  padding: 12px 15px;
+  font-weight: 900;
+  font-size: 13px;
+}

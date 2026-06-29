@@ -119,6 +119,8 @@
       <thead>
         <tr>
           <th>Cliente</th>
+          <th>Producto</th>
+          <th>Cantidad</th>
           <th>Fecha</th>
           <th>Total</th>
           <th>Estado</th>
@@ -139,6 +141,20 @@
                 <span>ID: {{ pedido.id }}</span>
               </div>
             </div>
+          </td>
+
+          <td>
+            <div class="order-product">
+              <strong>{{ pedido.productoNombre || 'Pedido manual' }}</strong>
+              <span *ngIf="pedido.precioUnitario">Precio unitario: S/ {{ pedido.precioUnitario | number:'1.2-2' }}</span>
+              <span *ngIf="!pedido.precioUnitario">Sin producto vinculado</span>
+            </div>
+          </td>
+
+          <td>
+            <span class="quantity-pill">
+              {{ pedido.cantidad || '-' }}
+            </span>
           </td>
 
           <td>
