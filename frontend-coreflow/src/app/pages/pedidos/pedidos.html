@@ -1,1 +1,117 @@
-<p>pedidos works!</p>
+<section class="page-header">
+  <div>
+    <h2>Gestión de Pedidos</h2>
+    <p>Listado, búsqueda y mantenimiento de pedidos comerciales.</p>
+  </div>
+
+  <a *ngIf="auth.esAdmin()" routerLink="/pedidos/nuevo" class="btn btn-primary">
+    + Nuevo pedido
+  </a>
+</section>
+
+<section *ngIf="!auth.esAdmin()" class="notice">
+  Estás en modo consulta. Para crear, editar o eliminar pedidos debes iniciar sesión como ADMIN.
+</section>
+
+<section class="card">
+  <h3>Filtros de búsqueda</h3>
+
+  <div class="filters">
+    <div class="field">
+      <label>Buscar por cliente</label>
+      <input
+        type="text"
+        placeholder="Ejemplo: Juan Pérez"
+        [(ngModel)]="clienteBusqueda"
+      />
+      <button class="btn btn-secondary" type="button" (click)="buscarPorCliente()">
+        Buscar cliente
+      </button>
+    </div>
+
+    <div class="field">
+      <label>Buscar por estado</label>
+      <select [(ngModel)]="estadoBusqueda">
+        <option value="">Seleccione estado</option>
+        <option value="PENDIENTE">PENDIENTE</option>
+        <option value="EN_PROCESO">EN_PROCESO</option>
+        <option value="COMPLETADO">COMPLETADO</option>
+        <option value="CANCELADO">CANCELADO</option>
+      </select>
+
+      <button class="btn btn-secondary" type="button" (click)="buscarPorEstado()">
+        Buscar estado
+      </button>
+    </div>
+
+    <div class="field field-actions">
+      <label>&nbsp;</label>
+      <button class="btn btn-light" type="button" (click)="limpiarFiltros()">
+        Limpiar filtros
+      </button>
+    </div>
+  </div>
+</section>
+
+<div *ngIf="mensaje" class="alert success">
+  {{ mensaje }}
+</div>
+
+<div *ngIf="error" class="alert error">
+  {{ error }}
+</div>
+
+<section class="card">
+  <div class="table-header">
+    <h3>Pedidos registrados</h3>
+
+    <button class="btn btn-light" type="button" (click)="cargarPedidos()">
+      Actualizar
+    </button>
+  </div>
+
+  <p *ngIf="cargando">Cargando pedidos...</p>
+
+  <div *ngIf="!cargando && pedidos.length === 0" class="empty">
+    No hay pedidos registrados o no se encontraron resultados.
+  </div>
+
+  <div class="table-container" *ngIf="!cargando && pedidos.length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Cliente</th>
+          <th>Fecha</th>
+          <th>Total</th>
+          <th>Estado</th>
+          <th *ngIf="auth.esAdmin()">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let pedido of pedidos">
+          <td>{{ pedido.id }}</td>
+          <td>{{ pedido.cliente }}</td>
+          <td>{{ pedido.fecha }}</td>
+          <td>S/ {{ pedido.total | number:'1.2-2' }}</td>
+          <td>
+            <span class="status">
+              {{ pedido.estado }}
+            </span>
+          </td>
+
+          <td class="actions" *ngIf="auth.esAdmin()">
+            <a class="btn btn-edit" [routerLink]="['/pedidos/editar', pedido.id]">
+              Editar
+            </a>
+
+            <button class="btn btn-danger" type="button" (click)="eliminarPedido(pedido.id)">
+              Eliminar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
