@@ -724,3 +724,71 @@
     display: none;
   }
 }
+
+/* Corrección final del menú de usuario */
+.topbar {
+  z-index: 2000;
+}
+
+.user-menu-wrapper {
+  position: relative;
+  z-index: 2100;
+}
+
+.user-dropdown {
+  z-index: 2200;
+}
+
+.user-backdrop {
+  z-index: 1500;
+}
+
+/* Evita que los estilos generales del navbar dañen los links del dropdown */
+.nav-links .dropdown-item,
+.nav-links .dropdown-item.profile-link {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: #0f172a;
+  border-radius: 13px;
+  padding: 11px 12px;
+  text-align: left;
+  cursor: pointer;
+  font-weight: 900;
+  transition: 0.16s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  box-shadow: none;
+  transform: none;
+}
+
+.nav-links .dropdown-item:hover,
+.nav-links .dropdown-item.profile-link:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  transform: none;
+}
+
+.nav-links .dropdown-item.profile-link {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.nav-links .dropdown-item.disabled {
+  color: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.nav-links .logout-item {
+  color: #dc2626;
+}
+
+.nav-links .logout-item:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
