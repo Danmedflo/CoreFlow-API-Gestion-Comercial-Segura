@@ -34,12 +34,21 @@
           Inicio
         </a>
 
-        <a routerLink="/productos" routerLinkActive="active" (click)="cerrarMenu()">
+        <a
+          routerLink="/productos"
+          routerLinkActive="active"
+          (click)="cerrarMenu()"
+        >
           Productos
         </a>
 
-        <a routerLink="/pedidos" routerLinkActive="active" (click)="cerrarMenu()">
-          Pedidos
+        <a
+          *ngIf="auth.estaAutenticado()"
+          routerLink="/pedidos"
+          routerLinkActive="active"
+          (click)="cerrarMenu()"
+        >
+          {{ auth.esAdmin() ? 'Pedidos' : 'Mis pedidos' }}
         </a>
 
         <a
@@ -80,7 +89,11 @@
     </div>
   </header>
 
-  <div class="mobile-backdrop" [class.show]="menuAbierto" (click)="cerrarMenu()"></div>
+  <div
+    class="mobile-backdrop"
+    [class.show]="menuAbierto"
+    (click)="cerrarMenu()"
+  ></div>
 
   <main class="main-container">
     <router-outlet></router-outlet>

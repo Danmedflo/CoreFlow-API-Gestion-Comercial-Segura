@@ -7,11 +7,10 @@ import { Productos } from './pages/productos/productos';
 import { ProductoForm } from './pages/producto-form/producto-form';
 import { Pedidos } from './pages/pedidos/pedidos';
 import { PedidoForm } from './pages/pedido-form/pedido-form';
+import { ComprarPedido } from './pages/comprar-pedido/comprar-pedido';
 import { NotFound } from './pages/not-found/not-found';
 
 import { adminGuard } from './guards/admin.guard';
-
-import { ComprarPedido } from './pages/comprar-pedido/comprar-pedido';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -34,7 +33,12 @@ export const routes: Routes = [
     canActivate: [adminGuard]
   },
 
-  { path: 'pedidos', component: Pedidos, title: 'Pedidos' },
+  {
+    path: 'pedidos',
+    component: Pedidos,
+    title: 'Pedidos',
+    canActivate: [authGuard]
+  },
   {
     path: 'pedidos/comprar/:productoId',
     component: ComprarPedido,

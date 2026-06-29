@@ -1,9 +1,17 @@
-<section class="module-header">
+<section class="module-header catalog-header">
   <div>
-    <span class="eyebrow">Módulo comercial</span>
-    <h2>Gestión de Productos</h2>
+    <span class="eyebrow">
+      {{ auth.esAdmin() ? 'Módulo comercial' : 'Catálogo comercial' }}
+    </span>
+
+    <h2>{{ auth.esAdmin() ? 'Gestión de Productos' : 'Catálogo de Productos' }}</h2>
+
     <p>
-      Administra el catálogo comercial, controla stock, consulta categorías y ejecuta operaciones protegidas por rol.
+      {{
+        auth.esAdmin()
+          ? 'Administra el catálogo comercial, controla stock y gestiona operaciones protegidas por rol.'
+          : 'Explora los productos disponibles y genera pedidos desde tu cuenta.'
+      }}
     </p>
   </div>
 
@@ -12,66 +20,72 @@
   </a>
 </section>
 
-<section class="summary-grid">
+<section *ngIf="auth.esAdmin()" class="summary-grid">
   <article class="summary-card">
     <span class="summary-label">Productos</span>
     <strong>{{ productos.length }}</strong>
-    <p>Registros encontrados</p>
+    <p>Registros activos</p>
   </article>
 
   <article class="summary-card">
     <span class="summary-label">Stock total</span>
     <strong>{{ totalStock() }}</strong>
-    <p>Unidades disponibles</p>
+    <p>Unidades inventariadas</p>
   </article>
 
   <article class="summary-card">
     <span class="summary-label">Valor estimado</span>
     <strong>S/ {{ valorInventario() | number:'1.2-2' }}</strong>
-    <p>Inventario valorizado</p>
+    <p>Información administrativa</p>
   </article>
 </section>
 
-<section *ngIf="!auth.esAdmin()" class="notice">
-  Modo consulta activo. Las operaciones de creación, edición y eliminación requieren una sesión con rol ADMIN.
+<section *ngIf="!auth.estaAutenticado()" class="notice">
+  Puedes consultar el catálogo de productos. Para generar pedidos, inicia sesión en el sistema.
 </section>
 
-<section class="panel">
+<section *ngIf="auth.estaAutenticado() && !auth.esAdmin()" class="notice">
+  Puedes comprar productos disponibles. Las operaciones administrativas están reservadas al rol ADMIN.
+</section>
+
+<section class="panel filter-panel">
   <div class="panel-title">
     <div>
-      <h3>Filtros de búsqueda</h3>
-      <p>Refina la información por nombre del producto o categoría comercial.</p>
+      <h3>Buscar productos</h3>
+      <p>Filtra el catálogo por nombre o categoría comercial.</p>
     </div>
 
     <button class="btn btn-ghost" type="button" (click)="limpiarFiltros()">
-      Limpiar
+      Limpiar filtros
     </button>
   </div>
 
   <div class="filters">
     <div class="field">
       <label>Nombre del producto</label>
+
       <input
         type="text"
-        placeholder="Buscar por nombre"
+        placeholder="Ejemplo: laptop, monitor, teclado"
         [(ngModel)]="nombreBusqueda"
       />
 
       <button class="btn btn-dark" type="button" (click)="buscarPorNombre()">
-        Buscar nombre
+        Buscar
       </button>
     </div>
 
     <div class="field">
       <label>Categoría</label>
+
       <input
         type="text"
-        placeholder="Buscar por categoría"
+        placeholder="Ejemplo: tecnología, oficina"
         [(ngModel)]="categoriaBusqueda"
       />
 
       <button class="btn btn-dark" type="button" (click)="buscarPorCategoria()">
-        Buscar categoría
+        Filtrar
       </button>
     </div>
   </div>
@@ -85,11 +99,17 @@
   {{ error }}
 </div>
 
-<section class="panel">
-  <div class="panel-title">
+<section class="catalog-section">
+  <div class="catalog-title">
     <div>
-      <h3>Catálogo de productos</h3>
-      <p>Listado actualizado de productos registrados en el sistema.</p>
+      <h3>{{ auth.esAdmin() ? 'Inventario comercial' : 'Productos disponibles' }}</h3>
+      <p>
+        {{
+          auth.esAdmin()
+            ? 'Vista general de productos registrados en el sistema.'
+            : 'Selecciona un producto disponible para generar tu pedido.'
+        }}
+      </p>
     </div>
 
     <button class="btn btn-ghost" type="button" (click)="cargarProductos()">
@@ -98,95 +118,86 @@
   </div>
 
   <div *ngIf="cargando" class="loading">
-    Cargando información de productos...
+    Cargando catálogo de productos...
   </div>
 
   <div *ngIf="!cargando && productos.length === 0" class="empty-state">
     <h3>No se encontraron productos</h3>
-    <p>No existen registros disponibles o los filtros aplicados no tienen coincidencias.</p>
+    <p>No existen productos disponibles o los filtros aplicados no tienen coincidencias.</p>
   </div>
 
-  <div class="table-container" *ngIf="!cargando && productos.length > 0">
-    <table>
-      <thead>
-        <tr>
-          <th>Producto</th>
-          <th>Categoría</th>
-          <th>Precio</th>
-          <th>Stock</th>
-          <th>Estado</th>
-          <th *ngIf="auth.estaAutenticado()">Acciones</th>
-        </tr>
-      </thead>
+  <div class="catalog-grid" *ngIf="!cargando && productos.length > 0">
+    <article class="product-card" *ngFor="let producto of productos">
+      <div class="product-top">
+        <div class="product-avatar">
+          {{ inicialProducto(producto.nombre) }}
+        </div>
 
-      <tbody>
-        <tr *ngFor="let producto of productos">
-          <td>
-            <div class="product-cell">
-              <div class="product-avatar">
-                {{ inicialProducto(producto.nombre) }}
-              </div>
+        <span class="stock-pill" [ngClass]="stockClass(producto)">
+          {{ stockTexto(producto) }}
+        </span>
+      </div>
 
-              <div>
-                <strong>{{ producto.nombre }}</strong>
-                <span>ID: {{ producto.id }}</span>
-              </div>
-            </div>
-          </td>
+      <div class="product-body">
+        <span class="category-pill">
+          {{ producto.categoria }}
+        </span>
 
-          <td>
-            <span class="category-pill">
-              {{ producto.categoria }}
-            </span>
-          </td>
+        <h3>{{ producto.nombre }}</h3>
 
-          <td class="price">
-            S/ {{ producto.precio | number:'1.2-2' }}
-          </td>
+        <p>
+          Producto registrado en el catálogo comercial de CoreFlow.
+        </p>
+      </div>
 
-          <td>
-            {{ producto.stock }}
-          </td>
+      <div class="product-info">
+        <div>
+          <span>Precio</span>
+          <strong>S/ {{ producto.precio | number:'1.2-2' }}</strong>
+        </div>
 
-          <td>
-            <span class="stock-pill" [ngClass]="stockClass(producto)">
-              {{ stockTexto(producto) }}
-            </span>
-          </td>
+        <div>
+          <span>Disponibilidad</span>
+          <strong>{{ producto.stock }} unidades</strong>
+        </div>
+      </div>
 
-          <td class="actions" *ngIf="auth.estaAutenticado()">
-            <a
-              *ngIf="producto.stock > 0"
-              class="btn btn-buy"
-              [routerLink]="['/pedidos/comprar', producto.id]"
-            >
-              Comprar
-            </a>
+      <div class="product-actions">
+        <a
+          *ngIf="auth.estaAutenticado() && producto.stock > 0"
+          class="btn btn-buy"
+          [routerLink]="['/pedidos/comprar', producto.id]"
+        >
+          Comprar
+        </a>
 
-            <span *ngIf="producto.stock <= 0" class="unavailable-label">
-              Sin stock
-            </span>
+        <a
+          *ngIf="!auth.estaAutenticado()"
+          class="btn btn-login"
+          routerLink="/login"
+        >
+          Iniciar sesión
+        </a>
 
-            <a
-              *ngIf="auth.esAdmin()"
-              class="btn btn-edit"
-              [routerLink]="['/productos/editar', producto.id]"
-            >
-              Editar
-            </a>
+        <span *ngIf="auth.estaAutenticado() && producto.stock <= 0" class="unavailable-label">
+          Sin stock
+        </span>
 
-            <button
-              *ngIf="auth.esAdmin()"
-              class="btn btn-danger"
-              type="button"
-              (click)="abrirConfirmacionEliminar(producto)"
-            >
-              Eliminar
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+        <div class="admin-actions" *ngIf="auth.esAdmin()">
+          <a class="btn btn-edit" [routerLink]="['/productos/editar', producto.id]">
+            Editar
+          </a>
+
+          <button
+            class="btn btn-danger"
+            type="button"
+            (click)="abrirConfirmacionEliminar(producto)"
+          >
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </article>
   </div>
 </section>
 
