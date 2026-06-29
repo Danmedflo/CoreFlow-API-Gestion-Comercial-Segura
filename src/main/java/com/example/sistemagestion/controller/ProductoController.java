@@ -2,6 +2,7 @@ package com.example.sistemagestion.controller;
 
 import com.example.sistemagestion.model.Producto;
 import com.example.sistemagestion.repository.ProductoRepository;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,12 +54,15 @@ public class ProductoController {
         }
 
         Producto producto = productoOptional.get();
+
         producto.setNombre(productoActualizado.getNombre());
         producto.setPrecio(productoActualizado.getPrecio());
         producto.setStock(productoActualizado.getStock());
         producto.setCategoria(productoActualizado.getCategoria());
+        producto.setDescripcion(productoActualizado.getDescripcion());
 
         Producto productoGuardado = productoRepository.save(producto);
+
         return ResponseEntity.ok(productoGuardado);
     }
 
@@ -70,6 +74,7 @@ public class ProductoController {
         }
 
         productoRepository.deleteById(id);
+
         return ResponseEntity.ok(Map.of("mensaje", "Producto eliminado correctamente"));
     }
 

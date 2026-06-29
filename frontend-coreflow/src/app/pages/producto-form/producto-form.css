@@ -356,3 +356,30 @@
     width: 100%;
   }
 }
+
+.field textarea {
+  min-height: 110px;
+  border: 1px solid #d1d5db;
+  border-radius: 13px;
+  padding: 13px;
+  outline: none;
+  background: #f8fafc;
+  resize: vertical;
+  font-family: inherit;
+  transition: 0.18s ease;
+}
+
+.field textarea:focus {
+  border-color: #2563eb;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
+}
+
+.preview-description {
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 12px;
+  color: #475569 !important;
+  line-height: 1.5;
+  font-weight: 700 !important;
+}

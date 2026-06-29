@@ -22,7 +22,8 @@ export class ProductoForm implements OnInit {
     nombre: '',
     precio: 0,
     stock: 0,
-    categoria: ''
+    categoria: '',
+    descripcion: ''
   };
 
   idProducto?: number;

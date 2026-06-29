@@ -1,5 +1,5 @@
-import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 export interface ProductoModel {
@@ -8,6 +8,7 @@ export interface ProductoModel {
   precio: number;
   stock: number;
   categoria: string;
+  descripcion?: string;
 }
 
 @Injectable({
@@ -33,8 +34,8 @@ export class Producto {
     return this.http.put<ProductoModel>(`${this.apiUrl}/${id}`, producto);
   }
 
-  eliminar(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/${id}`);
+  eliminar(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
   buscarPorNombre(nombre: string): Observable<ProductoModel[]> {

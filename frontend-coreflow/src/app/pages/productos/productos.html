@@ -66,7 +66,7 @@
 
       <input
         type="text"
-        placeholder="Ejemplo: laptop, monitor, teclado"
+        placeholder="Ejemplo: mouse, teclado, micrófono"
         [(ngModel)]="nombreBusqueda"
       />
 
@@ -80,7 +80,7 @@
 
       <input
         type="text"
-        placeholder="Ejemplo: tecnología, oficina"
+        placeholder="Ejemplo: accesorios, tecnología"
         [(ngModel)]="categoriaBusqueda"
       />
 
@@ -103,6 +103,7 @@
   <div class="catalog-title">
     <div>
       <h3>{{ auth.esAdmin() ? 'Inventario comercial' : 'Productos disponibles' }}</h3>
+
       <p>
         {{
           auth.esAdmin()
@@ -145,8 +146,11 @@
 
         <h3>{{ producto.nombre }}</h3>
 
-        <p>
-          Producto registrado en el catálogo comercial de CoreFlow.
+        <p class="product-description">
+          {{
+            producto.descripcion ||
+            'Producto disponible para consulta y generación de pedidos dentro del sistema comercial.'
+          }}
         </p>
       </div>
 
@@ -179,7 +183,10 @@
           Iniciar sesión
         </a>
 
-        <span *ngIf="auth.estaAutenticado() && producto.stock <= 0" class="unavailable-label">
+        <span
+          *ngIf="auth.estaAutenticado() && producto.stock <= 0"
+          class="unavailable-label"
+        >
           Sin stock
         </span>
 
