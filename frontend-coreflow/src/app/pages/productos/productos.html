@@ -1,22 +1,22 @@
 <section class="module-header catalog-header">
   <div>
-    <span class="eyebrow">
-      {{ auth.esAdmin() ? 'Módulo comercial' : 'Catálogo comercial' }}
-    </span>
-
+    <span class="eyebrow">{{ auth.esAdmin() ? 'Módulo comercial' : 'Catálogo comercial' }}</span>
     <h2>{{ auth.esAdmin() ? 'Gestión de Productos' : 'Catálogo de Productos' }}</h2>
-
     <p>
       {{
         auth.esAdmin()
           ? 'Administra el catálogo comercial, controla stock y gestiona operaciones protegidas por rol.'
-          : 'Explora los productos disponibles y genera pedidos desde tu cuenta.'
+          : 'Explora los productos disponibles, agrégalos al carrito y confirma tu pedido.'
       }}
     </p>
   </div>
 
   <a *ngIf="auth.esAdmin()" routerLink="/productos/nuevo" class="btn btn-primary">
     Nuevo producto
+  </a>
+
+  <a *ngIf="auth.estaAutenticado() && !auth.esAdmin()" routerLink="/carrito" class="btn btn-primary">
+    Ver carrito
   </a>
 </section>
 
@@ -40,80 +40,74 @@
   </article>
 </section>
 
-<section *ngIf="!auth.estaAutenticado()" class="notice">
-  Puedes consultar el catálogo de productos. Para generar pedidos, inicia sesión en el sistema.
-</section>
+<div *ngIf="!auth.estaAutenticado()" class="notice">
+  Puedes consultar el catálogo de productos. Para agregar productos al carrito, inicia sesión en el sistema.
+</div>
 
-<section *ngIf="auth.estaAutenticado() && !auth.esAdmin()" class="notice">
-  Puedes comprar productos disponibles. Las operaciones administrativas están reservadas al rol ADMIN.
-</section>
+<div *ngIf="auth.estaAutenticado() && !auth.esAdmin()" class="notice">
+  Puedes agregar productos al carrito y confirmar un pedido con varios productos.
+</div>
 
-<section class="panel filter-panel">
+<section class="panel">
   <div class="panel-title">
     <div>
       <h3>Buscar productos</h3>
       <p>Filtra el catálogo por nombre o categoría comercial.</p>
     </div>
 
-    <button class="btn btn-ghost" type="button" (click)="limpiarFiltros()">
+    <button type="button" class="btn btn-ghost" (click)="limpiarFiltros()">
       Limpiar filtros
     </button>
   </div>
 
   <div class="filters">
     <div class="field">
-      <label>Nombre del producto</label>
-
+      <label for="nombreBusqueda">Nombre del producto</label>
       <input
+        id="nombreBusqueda"
+        name="nombreBusqueda"
         type="text"
-        placeholder="Ejemplo: mouse, teclado, micrófono"
         [(ngModel)]="nombreBusqueda"
-      />
-
-      <button class="btn btn-dark" type="button" (click)="buscarPorNombre()">
+        placeholder="Ejemplo: teclado"
+      >
+      <button type="button" class="btn btn-dark" (click)="buscarPorNombre()">
         Buscar
       </button>
     </div>
 
     <div class="field">
-      <label>Categoría</label>
-
+      <label for="categoriaBusqueda">Categoría</label>
       <input
+        id="categoriaBusqueda"
+        name="categoriaBusqueda"
         type="text"
-        placeholder="Ejemplo: accesorios, tecnología"
         [(ngModel)]="categoriaBusqueda"
-      />
-
-      <button class="btn btn-dark" type="button" (click)="buscarPorCategoria()">
+        placeholder="Ejemplo: accesorios"
+      >
+      <button type="button" class="btn btn-dark" (click)="buscarPorCategoria()">
         Filtrar
       </button>
     </div>
   </div>
 </section>
 
-<div *ngIf="mensaje" class="alert success">
-  {{ mensaje }}
-</div>
-
-<div *ngIf="error" class="alert error">
-  {{ error }}
-</div>
+<div *ngIf="mensaje" class="alert success">{{ mensaje }}</div>
+<div *ngIf="error" class="alert error">{{ error }}</div>
 
 <section class="catalog-section">
   <div class="catalog-title">
     <div>
       <h3>{{ auth.esAdmin() ? 'Inventario comercial' : 'Productos disponibles' }}</h3>
-
       <p>
         {{
           auth.esAdmin()
             ? 'Vista general de productos registrados en el sistema.'
-            : 'Selecciona un producto disponible para generar tu pedido.'
+            : 'Selecciona productos disponibles para agregarlos al carrito.'
         }}
       </p>
     </div>
 
-    <button class="btn btn-ghost" type="button" (click)="cargarProductos()">
+    <button type="button" class="btn btn-ghost" (click)="cargarProductos()">
       Actualizar
     </button>
   </div>
@@ -127,8 +121,8 @@
     <p>No existen productos disponibles o los filtros aplicados no tienen coincidencias.</p>
   </div>
 
-  <div class="catalog-grid" *ngIf="!cargando && productos.length > 0">
-    <article class="product-card" *ngFor="let producto of productos">
+  <div *ngIf="!cargando && productos.length > 0" class="catalog-grid">
+    <article *ngFor="let producto of productos" class="product-card">
       <div class="product-top">
         <div class="product-avatar">
           {{ inicialProducto(producto.nombre) }}
@@ -140,66 +134,58 @@
       </div>
 
       <div class="product-body">
-        <span class="category-pill">
-          {{ producto.categoria }}
-        </span>
+        <span class="category-pill">{{ producto.categoria }}</span>
 
         <h3>{{ producto.nombre }}</h3>
 
         <p class="product-description">
-          {{
-            producto.descripcion ||
-            'Producto disponible para consulta y generación de pedidos dentro del sistema comercial.'
-          }}
+          {{ producto.descripcion || 'Producto disponible para consulta y generación de pedidos dentro del sistema comercial.' }}
         </p>
-      </div>
 
-      <div class="product-info">
-        <div>
-          <span>Precio</span>
-          <strong>S/ {{ producto.precio | number:'1.2-2' }}</strong>
-        </div>
+        <div class="product-info">
+          <div>
+            <span>Precio</span>
+            <strong>S/ {{ producto.precio | number:'1.2-2' }}</strong>
+          </div>
 
-        <div>
-          <span>Disponibilidad</span>
-          <strong>{{ producto.stock }} unidades</strong>
+          <div>
+            <span>Disponibilidad</span>
+            <strong>{{ producto.stock }} unidades</strong>
+          </div>
         </div>
       </div>
 
       <div class="product-actions">
-        <a
-          *ngIf="auth.estaAutenticado() && producto.stock > 0"
+        <button
+          *ngIf="auth.estaAutenticado() && !auth.esAdmin() && producto.stock > 0"
+          type="button"
           class="btn btn-buy"
-          [routerLink]="['/pedidos/comprar', producto.id]"
+          (click)="agregarAlCarrito(producto)"
         >
-          Comprar
-        </a>
+          Agregar al carrito
+          <span *ngIf="cantidadEnCarrito(producto) > 0">
+            ({{ cantidadEnCarrito(producto) }})
+          </span>
+        </button>
 
         <a
-          *ngIf="!auth.estaAutenticado()"
-          class="btn btn-login"
+          *ngIf="!auth.estaAutenticado() && producto.stock > 0"
           routerLink="/login"
+          class="btn btn-login"
         >
           Iniciar sesión
         </a>
 
-        <span
-          *ngIf="auth.estaAutenticado() && producto.stock <= 0"
-          class="unavailable-label"
-        >
+        <span *ngIf="producto.stock <= 0" class="unavailable-label">
           Sin stock
         </span>
 
-        <div class="admin-actions" *ngIf="auth.esAdmin()">
-          <a class="btn btn-edit" [routerLink]="['/productos/editar', producto.id]">
+        <div *ngIf="auth.esAdmin()" class="admin-actions">
+          <a [routerLink]="['/productos/editar', producto.id]" class="btn btn-edit">
             Editar
           </a>
 
-          <button
-            class="btn btn-danger"
-            type="button"
-            (click)="abrirConfirmacionEliminar(producto)"
-          >
+          <button type="button" class="btn btn-danger" (click)="abrirConfirmacionEliminar(producto)">
             Eliminar
           </button>
         </div>
@@ -209,12 +195,13 @@
 </section>
 
 <app-confirm-modal
-  [visible]="productoAEliminar !== null"
+  *ngIf="productoAEliminar"
+  [visible]="true"
   titulo="Eliminar producto"
-  mensaje="Esta acción eliminará el producto seleccionado del catálogo comercial."
-  [detalle]="'Producto: ' + (productoAEliminar?.nombre || '')"
-  textoCancelar="Cancelar"
+  [mensaje]="'¿Deseas eliminar el producto ' + productoAEliminar.nombre + '?'"
+  detalle="Esta acción eliminará el producto del catálogo comercial."
   textoConfirmar="Eliminar"
-  (cancelar)="cancelarEliminacion()"
+  textoCancelar="Cancelar"
   (confirmar)="confirmarEliminacion()"
+  (cancelar)="cancelarEliminacion()"
 ></app-confirm-modal>

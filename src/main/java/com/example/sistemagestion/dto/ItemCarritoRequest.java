@@ -1,26 +1,16 @@
 package com.example.sistemagestion.dto;
 
-public class ComprarPedidoRequest {
+public class ItemCarritoRequest {
 
-    private String cliente;
     private Long productoId;
     private int cantidad;
 
-    public ComprarPedidoRequest() {
+    public ItemCarritoRequest() {
     }
 
-    public ComprarPedidoRequest(String cliente, Long productoId, int cantidad) {
-        this.cliente = cliente;
+    public ItemCarritoRequest(Long productoId, int cantidad) {
         this.productoId = productoId;
         this.cantidad = cantidad;
-    }
-
-    public String getCliente() {
-        return cliente;
-    }
-
-    public void setCliente(String cliente) {
-        this.cliente = cliente;
     }
 
     public Long getProductoId() {

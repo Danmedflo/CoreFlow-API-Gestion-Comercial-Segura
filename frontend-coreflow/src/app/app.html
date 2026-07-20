@@ -1,7 +1,7 @@
 <div class="app-shell">
   <header class="topbar">
     <div class="topbar-inner">
-      <a routerLink="/" class="brand" (click)="cerrarMenu(); cerrarUserMenu()">
+      <a routerLink="/" class="brand" (click)="cerrarMenu()">
         <div class="brand-logo">
           <span>CF</span>
         </div>
@@ -13,11 +13,11 @@
       </a>
 
       <button
+        type="button"
         class="menu-toggle"
         [class.open]="menuAbierto"
-        type="button"
-        aria-label="Abrir menú"
         (click)="cambiarMenu()"
+        aria-label="Abrir menú"
       >
         <span></span>
         <span></span>
@@ -25,28 +25,32 @@
       </button>
 
       <nav class="nav-links" [class.open]="menuAbierto">
-        <a
-          routerLink="/"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: true }"
-          (click)="cerrarMenu(); cerrarUserMenu()"
-        >
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="cerrarMenu()">
           Inicio
         </a>
 
-        <a
-          routerLink="/productos"
-          routerLinkActive="active"
-          (click)="cerrarMenu(); cerrarUserMenu()"
-        >
+        <a routerLink="/productos" routerLinkActive="active" (click)="cerrarMenu()">
           Productos
+        </a>
+
+        <a
+          *ngIf="auth.estaAutenticado() && !auth.esAdmin()"
+          routerLink="/carrito"
+          routerLinkActive="active"
+          class="cart-link"
+          (click)="cerrarMenu()"
+        >
+          Carrito
+          <span *ngIf="cantidadCarrito() > 0" class="cart-badge">
+            {{ cantidadCarrito() }}
+          </span>
         </a>
 
         <a
           *ngIf="auth.estaAutenticado()"
           routerLink="/pedidos"
           routerLinkActive="active"
-          (click)="cerrarMenu(); cerrarUserMenu()"
+          (click)="cerrarMenu()"
         >
           {{ auth.esAdmin() ? 'Pedidos' : 'Mis pedidos' }}
         </a>
@@ -55,7 +59,7 @@
           *ngIf="!auth.estaAutenticado()"
           routerLink="/login"
           routerLinkActive="active"
-          (click)="cerrarMenu(); cerrarUserMenu()"
+          (click)="cerrarMenu()"
         >
           Login
         </a>
@@ -64,36 +68,26 @@
           *ngIf="!auth.estaAutenticado()"
           routerLink="/registro"
           routerLinkActive="active"
-          (click)="cerrarMenu(); cerrarUserMenu()"
+          (click)="cerrarMenu()"
         >
           Registro
         </a>
 
         <div *ngIf="auth.estaAutenticado()" class="user-menu-wrapper">
           <button
-            class="user-menu-trigger"
             type="button"
+            class="user-menu-trigger"
             [class.open]="userMenuAbierto"
             (click)="cambiarUserMenu()"
           >
-            <span class="user-avatar">
-              {{ inicialUsuario() }}
-            </span>
-
-            <span class="user-name">
-              {{ nombreVisible() }}
-            </span>
-
-            <span class="user-chevron">
-              ▾
-            </span>
+            <span class="user-avatar">{{ inicialUsuario() }}</span>
+            <span class="user-name">{{ nombreVisible() }}</span>
+            <span class="user-chevron">▾</span>
           </button>
 
-          <div class="user-dropdown" *ngIf="userMenuAbierto">
+          <div *ngIf="userMenuAbierto" class="user-dropdown">
             <div class="dropdown-header">
-              <span class="dropdown-avatar">
-                {{ inicialUsuario() }}
-              </span>
+              <span class="dropdown-avatar">{{ inicialUsuario() }}</span>
 
               <div>
                 <strong>{{ nombreVisible() }}</strong>
@@ -103,16 +97,12 @@
             </div>
 
             <div class="dropdown-section">
-              <a
-                routerLink="/perfil"
-                class="dropdown-item"
-                (click)="cerrarUserMenu(); cerrarMenu()"
-              >
-                <span>Editar perfil</span>
+              <a routerLink="/perfil" class="dropdown-item profile-link" (click)="cerrarUserMenu(); cerrarMenu()">
+                Editar perfil
               </a>
 
               <button type="button" class="dropdown-item disabled">
-                <span>Preferencias</span>
+                Preferencias
                 <small>Próximamente</small>
               </button>
             </div>
@@ -129,12 +119,12 @@
   <div
     class="mobile-backdrop"
     [class.show]="menuAbierto"
-    (click)="cerrarMenu(); cerrarUserMenu()"
+    (click)="cerrarMenu()"
   ></div>
 
   <div
-    class="user-backdrop"
     *ngIf="userMenuAbierto"
+    class="user-backdrop"
     (click)="cerrarUserMenu()"
   ></div>
 

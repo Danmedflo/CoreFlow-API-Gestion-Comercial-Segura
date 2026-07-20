@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { Auth } from './services/auth';
+import { Carrito } from './services/carrito';
 
 @Component({
   selector: 'app-root',
@@ -12,6 +13,8 @@ import { Auth } from './services/auth';
 })
 export class App {
   auth = inject(Auth);
+
+  private carrito = inject(Carrito);
   private router = inject(Router);
 
   menuAbierto = false;
@@ -36,10 +39,15 @@ export class App {
   }
 
   cerrarSesion(): void {
+    this.carrito.vaciar();
     this.auth.cerrarSesion();
     this.menuAbierto = false;
     this.userMenuAbierto = false;
     this.router.navigate(['/login']);
+  }
+
+  cantidadCarrito(): number {
+    return this.carrito.cantidadTotal();
   }
 
   nombreVisible(): string {

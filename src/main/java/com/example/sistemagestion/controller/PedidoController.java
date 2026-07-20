@@ -1,19 +1,21 @@
 package com.example.sistemagestion.controller;
 
-import com.example.sistemagestion.dto.ComprarPedidoRequest;
+import com.example.sistemagestion.dto.CheckoutPedidoRequest;
+import com.example.sistemagestion.dto.ItemCarritoRequest;
 import com.example.sistemagestion.model.Pedido;
+import com.example.sistemagestion.model.PedidoDetalle;
 import com.example.sistemagestion.model.Producto;
 import com.example.sistemagestion.repository.PedidoRepository;
 import com.example.sistemagestion.repository.ProductoRepository;
-
 import jakarta.transaction.Transactional;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -46,7 +48,6 @@ public class PedidoController {
         }
 
         List<Pedido> pedidos = pedidoRepository.findByClienteIgnoreCase(usuarioActual);
-
         return ResponseEntity.ok(pedidos);
     }
 
@@ -63,14 +64,18 @@ public class PedidoController {
     }
 
     @PostMapping
-    public ResponseEntity<?> crear(@RequestBody Pedido pedido) {
+    public ResponseEntity<Pedido> crear(@RequestBody Pedido pedido) {
+        if (pedido.getEstado() == null || pedido.getEstado().isBlank()) {
+            pedido.setEstado("PENDIENTE");
+        }
+
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
         return ResponseEntity.ok(pedidoGuardado);
     }
 
     @Transactional
-    @PostMapping("/comprar")
-    public ResponseEntity<?> comprarProducto(@RequestBody ComprarPedidoRequest request) {
+    @PostMapping("/checkout")
+    public ResponseEntity<?> checkout(@RequestBody CheckoutPedidoRequest request) {
         String usuarioActual = obtenerUsuarioActual();
 
         if (usuarioActual == null) {
@@ -78,44 +83,76 @@ public class PedidoController {
                     .body(Map.of("mensaje", "Usuario no autenticado"));
         }
 
-        if (request.getProductoId() == null) {
+        if (request == null || request.getItems() == null || request.getItems().isEmpty()) {
             return ResponseEntity.badRequest()
-                    .body(Map.of("mensaje", "El producto es obligatorio"));
+                    .body(Map.of("mensaje", "El carrito está vacío"));
         }
 
-        if (request.getCantidad() <= 0) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("mensaje", "La cantidad debe ser mayor a cero"));
+        Map<Long, Integer> cantidadesPorProducto = new LinkedHashMap<>();
+
+        for (ItemCarritoRequest item : request.getItems()) {
+            if (item.getProductoId() == null) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("mensaje", "Todos los productos del carrito deben tener identificador"));
+            }
+
+            if (item.getCantidad() <= 0) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("mensaje", "La cantidad de cada producto debe ser mayor a cero"));
+            }
+
+            cantidadesPorProducto.merge(item.getProductoId(), item.getCantidad(), Integer::sum);
         }
-
-        Optional<Producto> productoOptional = productoRepository.findById(request.getProductoId());
-
-        if (productoOptional.isEmpty()) {
-            return ResponseEntity.status(404)
-                    .body(Map.of("mensaje", "Producto no encontrado"));
-        }
-
-        Producto producto = productoOptional.get();
-
-        if (producto.getStock() < request.getCantidad()) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("mensaje", "Stock insuficiente para realizar el pedido"));
-        }
-
-        producto.setStock(producto.getStock() - request.getCantidad());
-        productoRepository.save(producto);
 
         Pedido pedido = new Pedido();
         pedido.setCliente(usuarioActual);
         pedido.setFecha(LocalDate.now().toString());
         pedido.setEstado("PENDIENTE");
 
-        pedido.setProductoId(producto.getId());
-        pedido.setProductoNombre(producto.getNombre());
-        pedido.setCantidad(request.getCantidad());
-        pedido.setPrecioUnitario(producto.getPrecio());
-        pedido.setTotal(producto.getPrecio() * request.getCantidad());
+        List<Producto> productosActualizados = new ArrayList<>();
+        double totalPedido = 0;
 
+        for (Map.Entry<Long, Integer> entry : cantidadesPorProducto.entrySet()) {
+            Long productoId = entry.getKey();
+            int cantidadSolicitada = entry.getValue();
+
+            Optional<Producto> productoOptional = productoRepository.findById(productoId);
+
+            if (productoOptional.isEmpty()) {
+                return ResponseEntity.status(404)
+                        .body(Map.of("mensaje", "Producto no encontrado en el carrito"));
+            }
+
+            Producto producto = productoOptional.get();
+
+            if (producto.getStock() < cantidadSolicitada) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of(
+                                "mensaje",
+                                "Stock insuficiente para el producto: " + producto.getNombre()
+                        ));
+            }
+
+            double subtotal = producto.getPrecio() * cantidadSolicitada;
+
+            PedidoDetalle detalle = new PedidoDetalle(
+                    producto.getId(),
+                    producto.getNombre(),
+                    cantidadSolicitada,
+                    producto.getPrecio(),
+                    subtotal
+            );
+
+            pedido.agregarDetalle(detalle);
+            totalPedido += subtotal;
+
+            producto.setStock(producto.getStock() - cantidadSolicitada);
+            productosActualizados.add(producto);
+        }
+
+        pedido.setTotal(totalPedido);
+
+        productoRepository.saveAll(productosActualizados);
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
 
         return ResponseEntity.ok(pedidoGuardado);
@@ -131,19 +168,12 @@ public class PedidoController {
         }
 
         Pedido pedido = pedidoOptional.get();
-
         pedido.setCliente(pedidoActualizado.getCliente());
         pedido.setFecha(pedidoActualizado.getFecha());
         pedido.setTotal(pedidoActualizado.getTotal());
         pedido.setEstado(pedidoActualizado.getEstado());
 
-        pedido.setProductoId(pedidoActualizado.getProductoId());
-        pedido.setProductoNombre(pedidoActualizado.getProductoNombre());
-        pedido.setCantidad(pedidoActualizado.getCantidad());
-        pedido.setPrecioUnitario(pedidoActualizado.getPrecioUnitario());
-
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
-
         return ResponseEntity.ok(pedidoGuardado);
     }
 
@@ -155,7 +185,6 @@ public class PedidoController {
         }
 
         pedidoRepository.deleteById(id);
-
         return ResponseEntity.ok(Map.of("mensaje", "Pedido eliminado correctamente"));
     }
 

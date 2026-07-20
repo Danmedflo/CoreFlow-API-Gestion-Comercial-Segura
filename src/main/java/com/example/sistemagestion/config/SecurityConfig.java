@@ -3,7 +3,6 @@ package com.example.sistemagestion.config;
 import java.util.List;
 
 import com.example.sistemagestion.security.JwtAuthenticationFilter;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -36,36 +35,32 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-
-                        // Preflight CORS
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // Rutas públicas de autenticación
+                        // Rutas públicas
                         .requestMatchers("/api/auth/**").permitAll()
 
                         // Productos visibles para todos
                         .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
 
-                        // Comprar producto: cualquier usuario logeado puede generar pedido
-                        .requestMatchers(HttpMethod.POST, "/api/pedidos/comprar").authenticated()
+                        // Carrito / checkout: cualquier usuario autenticado puede generar pedido
+                        // IMPORTANTE: esta regla debe ir antes de /api/pedidos/**
+                        .requestMatchers(HttpMethod.POST, "/api/pedidos/checkout").authenticated()
 
-                        // Mis pedidos: usuario logeado ve solo sus pedidos
+                        // Mis pedidos: cualquier usuario autenticado
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/mis-pedidos").authenticated()
 
-                        // Pedidos generales: solo ADMIN puede ver todos
+                        // Gestión general de pedidos: solo ADMIN
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/**").hasRole("ADMIN")
-
-                        // Productos: solo ADMIN puede crear, editar o eliminar
-                        .requestMatchers(HttpMethod.POST, "/api/productos/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasRole("ADMIN")
-
-                        // Pedidos manuales: solo ADMIN puede crear, editar o eliminar
                         .requestMatchers(HttpMethod.POST, "/api/pedidos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/pedidos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/pedidos/**").hasRole("ADMIN")
 
-                        // Cualquier otra ruta requiere autenticación
+                        // Gestión de productos: solo ADMIN
+                        .requestMatchers(HttpMethod.POST, "/api/productos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

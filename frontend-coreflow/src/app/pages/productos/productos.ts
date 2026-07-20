@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 
 import { Producto, ProductoModel } from '../../services/producto';
 import { Auth } from '../../services/auth';
+import { Carrito } from '../../services/carrito';
 import { ConfirmModal } from '../../components/confirm-modal/confirm-modal';
 
 @Component({
@@ -15,6 +16,8 @@ import { ConfirmModal } from '../../components/confirm-modal/confirm-modal';
 })
 export class Productos implements OnInit {
   private productoService = inject(Producto);
+  private carritoService = inject(Carrito);
+
   auth = inject(Auth);
 
   productos: ProductoModel[] = [];
@@ -100,6 +103,39 @@ export class Productos implements OnInit {
     this.nombreBusqueda = '';
     this.categoriaBusqueda = '';
     this.cargarProductos();
+  }
+
+  agregarAlCarrito(producto: ProductoModel): void {
+    this.mensaje = '';
+    this.error = '';
+
+    if (!this.auth.estaAutenticado()) {
+      this.error = 'Inicia sesión para agregar productos al carrito.';
+      return;
+    }
+
+    if (this.auth.esAdmin()) {
+      this.error = 'El carrito está disponible para usuarios compradores. El ADMIN gestiona productos y pedidos.';
+      return;
+    }
+
+    try {
+      this.carritoService.agregarProducto(producto, 1);
+      this.mensaje = `Producto "${producto.nombre}" agregado al carrito.`;
+    } catch (error: any) {
+      this.error = error.message || 'No se pudo agregar el producto al carrito.';
+    }
+  }
+
+  cantidadEnCarrito(producto: ProductoModel): number {
+    if (!producto.id) {
+      return 0;
+    }
+
+    const item = this.carritoService.obtenerItems()
+      .find(productoCarrito => productoCarrito.productoId === producto.id);
+
+    return item ? item.cantidad : 0;
   }
 
   abrirConfirmacionEliminar(producto: ProductoModel): void {

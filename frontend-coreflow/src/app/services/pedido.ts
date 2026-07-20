@@ -2,12 +2,22 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
+export interface PedidoDetalleModel {
+  id?: number;
+  productoId: number;
+  productoNombre: string;
+  cantidad: number;
+  precioUnitario: number;
+  subtotal: number;
+}
+
 export interface PedidoModel {
   id?: number;
   cliente: string;
   fecha: string;
   total: number;
   estado: string;
+  detalles?: PedidoDetalleModel[];
 
   productoId?: number;
   productoNombre?: string;
@@ -15,10 +25,13 @@ export interface PedidoModel {
   precioUnitario?: number;
 }
 
-export interface ComprarPedidoRequest {
-  cliente: string;
+export interface ItemCarritoRequest {
   productoId: number;
   cantidad: number;
+}
+
+export interface CheckoutPedidoRequest {
+  items: ItemCarritoRequest[];
 }
 
 @Injectable({
@@ -44,8 +57,8 @@ export class Pedido {
     return this.http.post<PedidoModel>(this.apiUrl, pedido);
   }
 
-  comprar(request: ComprarPedidoRequest): Observable<PedidoModel> {
-    return this.http.post<PedidoModel>(`${this.apiUrl}/comprar`, request);
+  checkout(request: CheckoutPedidoRequest): Observable<PedidoModel> {
+    return this.http.post<PedidoModel>(`${this.apiUrl}/checkout`, request);
   }
 
   actualizar(id: number, pedido: PedidoModel): Observable<PedidoModel> {
@@ -57,10 +70,10 @@ export class Pedido {
   }
 
   buscarPorCliente(cliente: string): Observable<PedidoModel[]> {
-    return this.http.get<PedidoModel[]>(`${this.apiUrl}/buscar?cliente=${cliente}`);
+    return this.http.get<PedidoModel[]>(`${this.apiUrl}/buscar?cliente=${encodeURIComponent(cliente)}`);
   }
 
   buscarPorEstado(estado: string): Observable<PedidoModel[]> {
-    return this.http.get<PedidoModel[]>(`${this.apiUrl}/estado/${estado}`);
+    return this.http.get<PedidoModel[]>(`${this.apiUrl}/estado/${encodeURIComponent(estado)}`);
   }
 }

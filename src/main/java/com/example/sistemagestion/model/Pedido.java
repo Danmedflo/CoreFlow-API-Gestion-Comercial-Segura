@@ -1,10 +1,17 @@
 package com.example.sistemagestion.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "pedidos")
@@ -19,10 +26,14 @@ public class Pedido {
     private double total;
     private String estado;
 
-    private Long productoId;
-    private String productoNombre;
-    private int cantidad;
-    private double precioUnitario;
+    @OneToMany(
+            mappedBy = "pedido",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER
+    )
+    @JsonManagedReference
+    private List<PedidoDetalle> detalles = new ArrayList<>();
 
     public Pedido() {
     }
@@ -33,6 +44,16 @@ public class Pedido {
         this.fecha = fecha;
         this.total = total;
         this.estado = estado;
+    }
+
+    public void agregarDetalle(PedidoDetalle detalle) {
+        detalles.add(detalle);
+        detalle.setPedido(this);
+    }
+
+    public void limpiarDetalles() {
+        detalles.forEach(detalle -> detalle.setPedido(null));
+        detalles.clear();
     }
 
     public Long getId() {
@@ -75,35 +96,11 @@ public class Pedido {
         this.estado = estado;
     }
 
-    public Long getProductoId() {
-        return productoId;
+    public List<PedidoDetalle> getDetalles() {
+        return detalles;
     }
 
-    public void setProductoId(Long productoId) {
-        this.productoId = productoId;
-    }
-
-    public String getProductoNombre() {
-        return productoNombre;
-    }
-
-    public void setProductoNombre(String productoNombre) {
-        this.productoNombre = productoNombre;
-    }
-
-    public int getCantidad() {
-        return cantidad;
-    }
-
-    public void setCantidad(int cantidad) {
-        this.cantidad = cantidad;
-    }
-
-    public double getPrecioUnitario() {
-        return precioUnitario;
-    }
-
-    public void setPrecioUnitario(double precioUnitario) {
-        this.precioUnitario = precioUnitario;
+    public void setDetalles(List<PedidoDetalle> detalles) {
+        this.detalles = detalles;
     }
 }

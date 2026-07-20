@@ -1,14 +1,12 @@
 <section class="module-header">
   <div>
     <span class="eyebrow">Módulo operativo</span>
-
     <h2>{{ auth.esAdmin() ? 'Gestión de Pedidos' : 'Mis Pedidos' }}</h2>
-
     <p>
       {{
         auth.esAdmin()
           ? 'Supervisa pedidos comerciales, controla estados, consulta clientes y administra operaciones protegidas.'
-          : 'Consulta el historial de pedidos generados desde tus compras de productos.'
+          : 'Consulta el historial de pedidos generados desde tu carrito de compras.'
       }}
     </p>
   </div>
@@ -44,9 +42,9 @@
   </article>
 </section>
 
-<section *ngIf="!auth.esAdmin()" class="notice">
+<div *ngIf="!auth.esAdmin()" class="notice">
   Estás visualizando únicamente los pedidos asociados a tu usuario.
-</section>
+</div>
 
 <section class="panel">
   <div class="panel-title">
@@ -61,29 +59,33 @@
       </p>
     </div>
 
-    <button class="btn btn-ghost" type="button" (click)="limpiarFiltros()">
+    <button type="button" class="btn btn-ghost" (click)="limpiarFiltros()">
       Limpiar
     </button>
   </div>
 
   <div class="filters">
     <div class="field">
-      <label>Cliente</label>
+      <label for="clienteBusqueda">Cliente</label>
       <input
+        id="clienteBusqueda"
+        name="clienteBusqueda"
         type="text"
-        placeholder="Buscar por cliente"
         [(ngModel)]="clienteBusqueda"
-      />
-
-      <button class="btn btn-dark" type="button" (click)="buscarPorCliente()">
+        placeholder="Buscar cliente"
+      >
+      <button type="button" class="btn btn-dark" (click)="buscarPorCliente()">
         Buscar cliente
       </button>
     </div>
 
     <div class="field">
-      <label>Estado</label>
-
-      <select [(ngModel)]="estadoBusqueda">
+      <label for="estadoBusqueda">Estado</label>
+      <select
+        id="estadoBusqueda"
+        name="estadoBusqueda"
+        [(ngModel)]="estadoBusqueda"
+      >
         <option value="">Seleccionar estado</option>
         <option value="PENDIENTE">PENDIENTE</option>
         <option value="EN_PROCESO">EN PROCESO</option>
@@ -91,36 +93,30 @@
         <option value="CANCELADO">CANCELADO</option>
       </select>
 
-      <button class="btn btn-dark" type="button" (click)="buscarPorEstado()">
+      <button type="button" class="btn btn-dark" (click)="buscarPorEstado()">
         Buscar estado
       </button>
     </div>
   </div>
 </section>
 
-<div *ngIf="mensaje" class="alert success">
-  {{ mensaje }}
-</div>
+<div *ngIf="mensaje" class="alert success">{{ mensaje }}</div>
+<div *ngIf="error" class="alert error">{{ error }}</div>
 
-<div *ngIf="error" class="alert error">
-  {{ error }}
-</div>
-
-<section class="panel">
-  <div class="panel-title">
+<section class="table-section">
+  <div class="table-title">
     <div>
       <h3>{{ auth.esAdmin() ? 'Registro de pedidos' : 'Historial de compras' }}</h3>
-
       <p>
         {{
           auth.esAdmin()
             ? 'Listado actualizado de pedidos almacenados en el sistema.'
-            : 'Listado de pedidos generados desde tus compras.'
+            : 'Listado de pedidos generados desde tu carrito de compras.'
         }}
       </p>
     </div>
 
-    <button class="btn btn-ghost" type="button" (click)="cargarPedidos()">
+    <button type="button" class="btn btn-ghost" (click)="cargarPedidos()">
       Actualizar
     </button>
   </div>
@@ -134,13 +130,13 @@
     <p>No existen registros disponibles o los filtros aplicados no tienen coincidencias.</p>
   </div>
 
-  <div class="table-container" *ngIf="!cargando && pedidos.length > 0">
+  <div *ngIf="!cargando && pedidos.length > 0" class="table-wrapper">
     <table>
       <thead>
         <tr>
           <th>Cliente</th>
-          <th>Producto</th>
-          <th>Cantidad</th>
+          <th>Productos</th>
+          <th>Unidades</th>
           <th>Fecha</th>
           <th>Total</th>
           <th>Estado</th>
@@ -152,45 +148,36 @@
         <tr *ngFor="let pedido of pedidos">
           <td>
             <div class="client-cell">
-              <div class="client-avatar">
-                {{ inicialCliente(pedido.cliente) }}
-              </div>
-
+              <span class="client-avatar">{{ inicialCliente(pedido.cliente) }}</span>
               <div>
                 <strong>{{ pedido.cliente }}</strong>
-                <span>ID: {{ pedido.id }}</span>
+                <small>ID: {{ pedido.id }}</small>
               </div>
             </div>
           </td>
 
           <td>
-            <div class="order-product">
-              <strong>{{ pedido.productoNombre || 'Pedido manual' }}</strong>
+            <strong>{{ resumenProductos(pedido) }}</strong>
 
-              <span *ngIf="pedido.precioUnitario">
-                Precio unitario: S/ {{ pedido.precioUnitario | number:'1.2-2' }}
-              </span>
-
-              <span *ngIf="!pedido.precioUnitario">
-                Sin producto vinculado
-              </span>
+            <div *ngIf="detallesPedido(pedido).length > 0" class="order-details">
+              <small *ngFor="let detalle of detallesPedido(pedido)">
+                {{ detalle.productoNombre }} -
+                {{ detalle.cantidad }} und. -
+                S/ {{ detalle.subtotal | number:'1.2-2' }}
+              </small>
             </div>
+
+            <small *ngIf="detallesPedido(pedido).length === 0 && pedido.productoNombre">
+              Precio unitario: S/ {{ pedido.precioUnitario | number:'1.2-2' }}
+            </small>
           </td>
+
+          <td>{{ cantidadTotalItems(pedido) || '-' }}</td>
+
+          <td>{{ pedido.fecha | date:'dd/MM/yyyy' }}</td>
 
           <td>
-            <span class="quantity-pill">
-              {{ pedido.cantidad || '-' }}
-            </span>
-          </td>
-
-          <td>
-            <span class="date-text">
-              {{ pedido.fecha | date:'dd/MM/yyyy' }}
-            </span>
-          </td>
-
-          <td class="amount">
-            S/ {{ pedido.total | number:'1.2-2' }}
+            <strong>S/ {{ pedido.total | number:'1.2-2' }}</strong>
           </td>
 
           <td>
@@ -199,14 +186,16 @@
             </span>
           </td>
 
-          <td class="actions" *ngIf="auth.esAdmin()">
-            <a class="btn btn-edit" [routerLink]="['/pedidos/editar', pedido.id]">
-              Editar
-            </a>
+          <td *ngIf="auth.esAdmin()">
+            <div class="actions">
+              <a [routerLink]="['/pedidos/editar', pedido.id]" class="btn btn-edit">
+                Editar
+              </a>
 
-            <button class="btn btn-danger" type="button" (click)="abrirConfirmacionEliminar(pedido)">
-              Eliminar
-            </button>
+              <button type="button" class="btn btn-danger" (click)="abrirConfirmacionEliminar(pedido)">
+                Eliminar
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -215,12 +204,13 @@
 </section>
 
 <app-confirm-modal
-  [visible]="pedidoAEliminar !== null"
+  *ngIf="pedidoAEliminar"
+  [visible]="true"
   titulo="Eliminar pedido"
-  mensaje="Esta acción eliminará el pedido seleccionado del registro comercial."
-  [detalle]="'Cliente: ' + (pedidoAEliminar?.cliente || '') + ' · Total: S/ ' + (pedidoAEliminar?.total || 0)"
-  textoCancelar="Cancelar"
+  [mensaje]="'¿Deseas eliminar el pedido del cliente ' + pedidoAEliminar.cliente + '?'"
+  detalle="Esta acción eliminará el pedido seleccionado del sistema."
   textoConfirmar="Eliminar"
-  (cancelar)="cancelarEliminacion()"
+  textoCancelar="Cancelar"
   (confirmar)="confirmarEliminacion()"
+  (cancelar)="cancelarEliminacion()"
 ></app-confirm-modal>

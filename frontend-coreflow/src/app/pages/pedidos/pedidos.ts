@@ -3,7 +3,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-import { Pedido, PedidoModel } from '../../services/pedido';
+import { Pedido, PedidoDetalleModel, PedidoModel } from '../../services/pedido';
 import { Auth } from '../../services/auth';
 import { ConfirmModal } from '../../components/confirm-modal/confirm-modal';
 
@@ -15,6 +15,7 @@ import { ConfirmModal } from '../../components/confirm-modal/confirm-modal';
 })
 export class Pedidos implements OnInit {
   private pedidoService = inject(Pedido);
+
   auth = inject(Auth);
 
   pedidos: PedidoModel[] = [];
@@ -49,7 +50,6 @@ export class Pedidos implements OnInit {
         this.error = this.auth.esAdmin()
           ? 'No se pudieron cargar los pedidos del sistema.'
           : 'No se pudieron cargar tus pedidos. Verifica tu sesión.';
-
         this.cargando = false;
       }
     });
@@ -157,6 +157,34 @@ export class Pedidos implements OnInit {
         this.pedidoAEliminar = null;
       }
     });
+  }
+
+  detallesPedido(pedido: PedidoModel): PedidoDetalleModel[] {
+    return pedido.detalles || [];
+  }
+
+  resumenProductos(pedido: PedidoModel): string {
+    const detalles = this.detallesPedido(pedido);
+
+    if (detalles.length === 0) {
+      return pedido.productoNombre || 'Pedido manual';
+    }
+
+    if (detalles.length === 1) {
+      return `${detalles[0].productoNombre} x${detalles[0].cantidad}`;
+    }
+
+    return `${detalles.length} productos`;
+  }
+
+  cantidadTotalItems(pedido: PedidoModel): number {
+    const detalles = this.detallesPedido(pedido);
+
+    if (detalles.length === 0) {
+      return pedido.cantidad || 0;
+    }
+
+    return detalles.reduce((total, detalle) => total + Number(detalle.cantidad || 0), 0);
   }
 
   totalVentas(): number {

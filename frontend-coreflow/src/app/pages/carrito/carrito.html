@@ -1,0 +1,122 @@
+<section class="cart-header">
+  <div>
+    <span class="eyebrow">Proceso comercial</span>
+    <h2>Carrito de Compras</h2>
+    <p>
+      Revisa los productos seleccionados, ajusta cantidades y confirma el pedido comercial.
+    </p>
+  </div>
+
+  <a routerLink="/productos" class="btn btn-ghost">Volver al catálogo</a>
+</section>
+
+<section class="summary-grid">
+  <article class="summary-card">
+    <span class="summary-label">Productos</span>
+    <strong>{{ items.length }}</strong>
+    <p>Registros en carrito</p>
+  </article>
+
+  <article class="summary-card">
+    <span class="summary-label">Unidades</span>
+    <strong>{{ cantidadTotal() }}</strong>
+    <p>Cantidad total solicitada</p>
+  </article>
+
+  <article class="summary-card">
+    <span class="summary-label">Total</span>
+    <strong>S/ {{ totalCarrito() | number:'1.2-2' }}</strong>
+    <p>Monto estimado del pedido</p>
+  </article>
+</section>
+
+<div *ngIf="mensaje" class="alert success">{{ mensaje }}</div>
+<div *ngIf="error" class="alert error">{{ error }}</div>
+
+<section class="cart-panel">
+  <div class="panel-title">
+    <div>
+      <h3>Detalle del carrito</h3>
+      <p>
+        El pedido se generará con todos los productos agregados y el backend validará nuevamente el stock disponible.
+      </p>
+    </div>
+  </div>
+
+  <div *ngIf="items.length === 0" class="empty-state">
+    <h3>Tu carrito está vacío</h3>
+    <p>Agrega productos desde el catálogo para iniciar el proceso de compra.</p>
+    <a routerLink="/productos" class="btn btn-primary">Ir al catálogo</a>
+  </div>
+
+  <div *ngIf="items.length > 0" class="cart-table-wrapper">
+    <table class="cart-table">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Categoría</th>
+          <th>Precio</th>
+          <th>Stock</th>
+          <th>Cantidad</th>
+          <th>Subtotal</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let item of items">
+          <td>
+            <strong>{{ item.nombre }}</strong>
+            <small>{{ item.descripcion || 'Producto agregado al carrito comercial.' }}</small>
+          </td>
+
+          <td>{{ item.categoria }}</td>
+
+          <td>S/ {{ item.precio | number:'1.2-2' }}</td>
+
+          <td>{{ item.stock }} unidades</td>
+
+          <td>
+            <input
+              type="number"
+              min="1"
+              [max]="item.stock"
+              [ngModel]="item.cantidad"
+              (ngModelChange)="actualizarCantidad(item, $event)"
+            >
+          </td>
+
+          <td>
+            <strong>S/ {{ subtotal(item) | number:'1.2-2' }}</strong>
+          </td>
+
+          <td>
+            <button type="button" class="btn btn-danger" (click)="eliminarItem(item)">
+              Quitar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section *ngIf="items.length > 0" class="checkout-panel">
+  <div>
+    <span class="summary-label">Total del pedido</span>
+    <strong>S/ {{ totalCarrito() | number:'1.2-2' }}</strong>
+    <p>
+      Al confirmar, se registrará el pedido y se descontará el stock desde Spring JPA.
+    </p>
+  </div>
+
+  <div class="checkout-actions">
+    <button type="button" class="btn btn-ghost" (click)="vaciarCarrito()" [disabled]="procesando">
+      Vaciar carrito
+    </button>
+
+    <button type="button" class="btn btn-primary" (click)="confirmarPedido()" [disabled]="procesando">
+      {{ procesando ? 'Procesando...' : 'Confirmar pedido' }}
+    </button>
+  </div>
+</section>
