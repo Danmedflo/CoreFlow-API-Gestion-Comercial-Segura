@@ -35,7 +35,11 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
+                        // Preflight CORS
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // Ruta interna de errores de Spring Boot
+                        .requestMatchers("/error").permitAll()
 
                         // Login y registro
                         .requestMatchers("/api/auth/**").permitAll()
@@ -43,9 +47,10 @@ public class SecurityConfig {
                         // Productos visibles para todos
                         .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
 
-                        // Checkout del carrito: cualquier usuario con JWT válido puede generar pedido.
-                        // Debe ir antes de POST /api/pedidos/** porque el resto de POST de pedidos es solo ADMIN.
-                        .requestMatchers(HttpMethod.POST, "/api/pedidos/checkout").authenticated()
+                        // Checkout del carrito:
+                        // Se permite llegar al controlador.
+                        // El PedidoController valida manualmente el JWT del header Authorization.
+                        .requestMatchers(HttpMethod.POST, "/api/pedidos/checkout").permitAll()
 
                         // Mis pedidos: usuario autenticado
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/mis-pedidos").authenticated()
@@ -61,6 +66,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasRole("ADMIN")
 
+                        // Cualquier otra ruta necesita autenticación
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

@@ -34,7 +34,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String method = request.getMethod();
 
         return "OPTIONS".equalsIgnoreCase(method)
-                || path.startsWith("/api/auth/");
+                || path.startsWith("/api/auth/")
+                || ("POST".equalsIgnoreCase(method) && "/api/pedidos/checkout".equals(path));
     }
 
     @Override

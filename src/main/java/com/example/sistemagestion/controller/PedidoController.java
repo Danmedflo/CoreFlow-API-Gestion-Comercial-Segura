@@ -7,10 +7,9 @@ import com.example.sistemagestion.model.PedidoDetalle;
 import com.example.sistemagestion.model.Producto;
 import com.example.sistemagestion.repository.PedidoRepository;
 import com.example.sistemagestion.repository.ProductoRepository;
+import com.example.sistemagestion.security.JwtUtil;
 import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -27,10 +26,16 @@ public class PedidoController {
 
     private final PedidoRepository pedidoRepository;
     private final ProductoRepository productoRepository;
+    private final JwtUtil jwtUtil;
 
-    public PedidoController(PedidoRepository pedidoRepository, ProductoRepository productoRepository) {
+    public PedidoController(
+            PedidoRepository pedidoRepository,
+            ProductoRepository productoRepository,
+            JwtUtil jwtUtil
+    ) {
         this.pedidoRepository = pedidoRepository;
         this.productoRepository = productoRepository;
+        this.jwtUtil = jwtUtil;
     }
 
     @GetMapping
@@ -39,12 +44,14 @@ public class PedidoController {
     }
 
     @GetMapping("/mis-pedidos")
-    public ResponseEntity<?> listarMisPedidos() {
-        String usuarioActual = obtenerUsuarioActual();
+    public ResponseEntity<?> listarMisPedidos(
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        String usuarioActual = obtenerUsuarioDesdeToken(authHeader);
 
         if (usuarioActual == null) {
             return ResponseEntity.status(401)
-                    .body(Map.of("mensaje", "Usuario no autenticado"));
+                    .body(Map.of("mensaje", "Token inválido o usuario no autenticado"));
         }
 
         List<Pedido> pedidos = pedidoRepository.findByClienteIgnoreCase(usuarioActual);
@@ -75,12 +82,15 @@ public class PedidoController {
 
     @Transactional
     @PostMapping("/checkout")
-    public ResponseEntity<?> checkout(@RequestBody CheckoutPedidoRequest request) {
-        String usuarioActual = obtenerUsuarioActual();
+    public ResponseEntity<?> checkout(
+            @RequestBody CheckoutPedidoRequest request,
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        String usuarioActual = obtenerUsuarioDesdeToken(authHeader);
 
         if (usuarioActual == null) {
             return ResponseEntity.status(401)
-                    .body(Map.of("mensaje", "Usuario no autenticado"));
+                    .body(Map.of("mensaje", "Token inválido o usuario no autenticado"));
         }
 
         if (request == null || request.getItems() == null || request.getItems().isEmpty()) {
@@ -198,19 +208,17 @@ public class PedidoController {
         return ResponseEntity.ok(pedidoRepository.findByClienteContainingIgnoreCase(cliente));
     }
 
-    private String obtenerUsuarioActual() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
+    private String obtenerUsuarioDesdeToken(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return null;
         }
 
-        String username = authentication.getName();
+        String token = authHeader.substring(7);
 
-        if (username == null || username.equals("anonymousUser")) {
+        if (!jwtUtil.validateToken(token)) {
             return null;
         }
 
-        return username;
+        return jwtUtil.extractUsername(token);
     }
 }
