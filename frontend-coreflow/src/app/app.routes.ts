@@ -6,7 +6,6 @@ import { Register } from './pages/register/register';
 import { Productos } from './pages/productos/productos';
 import { ProductoForm } from './pages/producto-form/producto-form';
 import { Pedidos } from './pages/pedidos/pedidos';
-import { PedidoForm } from './pages/pedido-form/pedido-form';
 import { PedidoOperativoPage } from './pages/pedido-operativo/pedido-operativo';
 import { CarritoPage } from './pages/carrito/carrito';
 import { PerfilPage } from './pages/perfil/perfil';
@@ -47,18 +46,6 @@ export const routes: Routes = [
     component: Pedidos,
     title: 'Pedidos',
     canActivate: [authGuard]
-  },
-  {
-    path: 'pedidos/nuevo',
-    component: PedidoForm,
-    title: 'Nuevo pedido',
-    canActivate: [adminGuard]
-  },
-  {
-    path: 'pedidos/editar/:id',
-    component: PedidoForm,
-    title: 'Editar pedido',
-    canActivate: [adminGuard]
   },
   {
     path: 'pedidos/operativo/:id',

@@ -27,17 +27,33 @@ export class Home implements OnInit {
 
   cargarResumen(): void {
     this.cargando = true;
+    this.totalProductos = 0;
+    this.totalPedidos = 0;
 
     this.productoService.listar().subscribe({
       next: (productos) => {
         this.totalProductos = productos.length;
+        this.cargarResumenPedidos();
       },
       error: () => {
         this.totalProductos = 0;
+        this.cargarResumenPedidos();
       }
     });
+  }
 
-    this.pedidoService.listar().subscribe({
+  private cargarResumenPedidos(): void {
+    if (!this.auth.estaAutenticado()) {
+      this.totalPedidos = 0;
+      this.cargando = false;
+      return;
+    }
+
+    const consulta = this.auth.esAdmin()
+      ? this.pedidoService.listar()
+      : this.pedidoService.listarMisPedidos();
+
+    consulta.subscribe({
       next: (pedidos) => {
         this.totalPedidos = pedidos.length;
         this.cargando = false;
