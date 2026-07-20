@@ -86,7 +86,7 @@ public class PedidoController {
             @RequestBody CheckoutPedidoRequest request,
             @RequestHeader(value = "Authorization", required = false) String authHeader
     ) {
-        String usuarioActual = obtenerUsuarioActualDesdeToken(authHeader);
+        String usuarioActual = obtenerUsuarioDesdeToken(authHeader);
 
         if (usuarioActual == null) {
             return ResponseEntity.status(401)
@@ -224,7 +224,7 @@ public class PedidoController {
         return username;
     }
 
-    private String obtenerUsuarioActualDesdeToken(String authHeader) {
+    private String obtenerUsuarioDesdeToken(String authHeader) {
         String usuarioDesdeContexto = obtenerUsuarioActual();
 
         if (usuarioDesdeContexto != null) {

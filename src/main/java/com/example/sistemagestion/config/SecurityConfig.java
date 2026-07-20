@@ -37,26 +37,21 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // Rutas públicas
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // Productos visibles para todos
                         .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
 
-                        // Checkout del carrito.
-                        // Se permite llegar al controlador, y el controlador valida el token manualmente.
+                        // Carrito de compras:
+                        // Se deja pasar al controlador y el controlador valida el JWT manualmente.
                         .requestMatchers(HttpMethod.POST, "/api/pedidos/checkout").permitAll()
 
-                        // Mis pedidos: usuario autenticado
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/mis-pedidos").authenticated()
 
-                        // Gestión general de pedidos: solo ADMIN
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/pedidos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/pedidos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/pedidos/**").hasRole("ADMIN")
 
-                        // Gestión de productos: solo ADMIN
                         .requestMatchers(HttpMethod.POST, "/api/productos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasRole("ADMIN")

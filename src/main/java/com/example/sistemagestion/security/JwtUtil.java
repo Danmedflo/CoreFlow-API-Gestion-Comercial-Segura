@@ -16,7 +16,7 @@ public class JwtUtil {
 
     private static final String SECRET = "mi_clave_secreta_para_spring_con_jwt_1234567890_segura";
 
-    // Token válido por 24 horas para evitar cierres durante la demo
+    // Token válido por 24 horas para evitar cierres durante la exposición.
     private static final long EXPIRATION_TIME = 1000L * 60 * 60 * 24;
 
     private final SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));

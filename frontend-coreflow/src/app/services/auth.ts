@@ -42,7 +42,18 @@ export class Auth {
   }
 
   obtenerToken(): string | null {
-    return localStorage.getItem('token');
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      return null;
+    }
+
+    if (this.tokenExpirado(token)) {
+      this.cerrarSesion();
+      return null;
+    }
+
+    return token;
   }
 
   obtenerUsuario(): string | null {
@@ -78,5 +89,19 @@ export class Auth {
     localStorage.removeItem('username');
     localStorage.removeItem('rol');
     localStorage.removeItem('nombreCompleto');
+  }
+
+  private tokenExpirado(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+
+      if (!payload.exp) {
+        return true;
+      }
+
+      return Date.now() >= payload.exp * 1000;
+    } catch {
+      return true;
+    }
   }
 }
