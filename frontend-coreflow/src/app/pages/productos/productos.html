@@ -20,24 +20,81 @@
   </a>
 </section>
 
-<section *ngIf="auth.esAdmin()" class="summary-grid">
+<section *ngIf="auth.esAdmin()" class="summary-grid product-panel-grid">
   <article class="summary-card">
     <span class="summary-label">Productos</span>
-    <strong>{{ productos.length }}</strong>
+    <strong>{{ totalProductosPanel() }}</strong>
     <p>Registros activos</p>
   </article>
 
   <article class="summary-card">
     <span class="summary-label">Stock total</span>
-    <strong>{{ totalStock() }}</strong>
+    <strong>{{ stockTotalPanel() }}</strong>
     <p>Unidades inventariadas</p>
   </article>
 
-  <article class="summary-card">
-    <span class="summary-label">Valor estimado</span>
-    <strong>S/ {{ valorInventario() | number:'1.2-2' }}</strong>
-    <p>Información administrativa</p>
+  <article class="summary-card warning-card">
+    <span class="summary-label">Stock crítico</span>
+    <strong>{{ stockCriticoPanel() }}</strong>
+    <p>Productos con 1 a 5 unidades</p>
   </article>
+
+  <article class="summary-card danger-card">
+    <span class="summary-label">Sin stock</span>
+    <strong>{{ sinStockPanel() }}</strong>
+    <p>Productos no disponibles</p>
+  </article>
+
+  <article class="summary-card value-card">
+    <span class="summary-label">Valor estimado</span>
+    <strong>S/ {{ valorInventarioPanel() | number:'1.2-2' }}</strong>
+    <p>Valor administrativo del inventario</p>
+  </article>
+</section>
+
+<section *ngIf="auth.esAdmin()" class="panel admin-inventory-panel">
+  <div class="panel-title">
+    <div>
+      <h3>Control operativo de inventario</h3>
+      <p>
+        Identifica productos con bajo stock o sin disponibilidad para tomar decisiones de reposición.
+      </p>
+    </div>
+
+    <button type="button" class="btn btn-ghost" (click)="cargarPanelAdministrativo()">
+      Actualizar panel
+    </button>
+  </div>
+
+  <div *ngIf="cargandoPanel" class="loading">
+    Actualizando indicadores del inventario...
+  </div>
+
+  <div *ngIf="!cargandoPanel && productosStockCritico.length === 0" class="empty-state small-empty">
+    <h3>Inventario estable</h3>
+    <p>No hay productos con stock crítico según el límite actual.</p>
+  </div>
+
+  <div *ngIf="!cargandoPanel && productosStockCritico.length > 0" class="critical-list">
+    <article *ngFor="let producto of productosStockCritico" class="critical-item">
+      <div>
+        <strong>{{ producto.nombre }}</strong>
+        <span>{{ producto.categoria }}</span>
+      </div>
+
+      <div class="critical-right">
+        <span class="stock-pill" [ngClass]="stockClass(producto)">
+          {{ stockTexto(producto) }}
+        </span>
+
+        <strong>{{ producto.stock }} unidades</strong>
+
+        <a [routerLink]="['/productos/editar', producto.id]" class="btn btn-edit mini-btn">
+          Reponer / editar
+        </a>
+      </div>
+    </article>
+  </div>
 </section>
 
 <div *ngIf="!auth.estaAutenticado()" class="notice">

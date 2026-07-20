@@ -70,6 +70,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/auth/**").permitAll()
 
+                        .requestMatchers(HttpMethod.GET, "/api/productos/panel/**").hasRole("ADMIN")
+                        
                         .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/mis-pedidos").authenticated()

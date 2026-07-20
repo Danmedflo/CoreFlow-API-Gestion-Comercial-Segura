@@ -3,7 +3,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-import { Producto, ProductoModel } from '../../services/producto';
+import { Producto, ProductoModel, ProductoPanelResumen } from '../../services/producto';
 import { Auth } from '../../services/auth';
 import { Carrito } from '../../services/carrito';
 import { ConfirmModal } from '../../components/confirm-modal/confirm-modal';
@@ -21,12 +21,17 @@ export class Productos implements OnInit {
   auth = inject(Auth);
 
   productos: ProductoModel[] = [];
+  productosStockCritico: ProductoModel[] = [];
+  panelResumen: ProductoPanelResumen | null = null;
+
   productoAEliminar: ProductoModel | null = null;
 
   nombreBusqueda = '';
   categoriaBusqueda = '';
+  limiteStockCritico = 5;
 
   cargando = false;
+  cargandoPanel = false;
   mensaje = '';
   error = '';
 
@@ -43,10 +48,42 @@ export class Productos implements OnInit {
       next: (data) => {
         this.productos = data;
         this.cargando = false;
+
+        if (this.auth.esAdmin()) {
+          this.cargarPanelAdministrativo();
+        }
       },
       error: () => {
         this.error = 'No se pudieron cargar los productos. Verifica que el backend esté ejecutándose.';
         this.cargando = false;
+      }
+    });
+  }
+
+  cargarPanelAdministrativo(): void {
+    if (!this.auth.esAdmin()) {
+      return;
+    }
+
+    this.cargandoPanel = true;
+
+    this.productoService.obtenerPanelResumen().subscribe({
+      next: (resumen) => {
+        this.panelResumen = resumen;
+        this.cargandoPanel = false;
+      },
+      error: () => {
+        this.panelResumen = null;
+        this.cargandoPanel = false;
+      }
+    });
+
+    this.productoService.listarStockCritico(this.limiteStockCritico).subscribe({
+      next: (data) => {
+        this.productosStockCritico = data;
+      },
+      error: () => {
+        this.productosStockCritico = [];
       }
     });
   }
@@ -166,12 +203,33 @@ export class Productos implements OnInit {
         this.mensaje = `Producto "${nombre}" eliminado correctamente.`;
         this.error = '';
         this.productoAEliminar = null;
+        this.cargarPanelAdministrativo();
       },
       error: () => {
         this.error = 'No se pudo eliminar el producto. Verifica que hayas iniciado sesión como ADMIN.';
         this.productoAEliminar = null;
       }
     });
+  }
+
+  totalProductosPanel(): number {
+    return this.panelResumen?.totalProductos ?? this.productos.length;
+  }
+
+  stockTotalPanel(): number {
+    return this.panelResumen?.stockTotal ?? this.totalStock();
+  }
+
+  stockCriticoPanel(): number {
+    return this.panelResumen?.productosStockCritico ?? this.productos.filter(producto => producto.stock > 0 && producto.stock <= 5).length;
+  }
+
+  sinStockPanel(): number {
+    return this.panelResumen?.productosSinStock ?? this.productos.filter(producto => producto.stock <= 0).length;
+  }
+
+  valorInventarioPanel(): number {
+    return this.panelResumen?.valorInventario ?? this.valorInventario();
   }
 
   totalStock(): number {
