@@ -37,21 +37,26 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
+                        // Login y registro
                         .requestMatchers("/api/auth/**").permitAll()
 
+                        // Productos visibles para todos
                         .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
 
-                        // Carrito de compras:
-                        // Se deja pasar al controlador y el controlador valida el JWT manualmente.
-                        .requestMatchers(HttpMethod.POST, "/api/pedidos/checkout").permitAll()
+                        // Checkout del carrito: cualquier usuario con JWT válido puede generar pedido.
+                        // Debe ir antes de POST /api/pedidos/** porque el resto de POST de pedidos es solo ADMIN.
+                        .requestMatchers(HttpMethod.POST, "/api/pedidos/checkout").authenticated()
 
+                        // Mis pedidos: usuario autenticado
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/mis-pedidos").authenticated()
 
+                        // Gestión general de pedidos: solo ADMIN
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/pedidos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/pedidos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/pedidos/**").hasRole("ADMIN")
 
+                        // Gestión de productos: solo ADMIN
                         .requestMatchers(HttpMethod.POST, "/api/productos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasRole("ADMIN")
@@ -75,6 +80,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of("http://localhost:4200"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

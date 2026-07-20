@@ -24,7 +24,7 @@ public class JwtUtil {
     public String generateToken(String username, String rol) {
         return Jwts.builder()
                 .setSubject(username)
-                .claim("rol", rol)
+                .claim("rol", normalizarRol(rol))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -37,7 +37,7 @@ public class JwtUtil {
 
     public String extractRol(String token) {
         String rol = getClaims(limpiarToken(token)).get("rol", String.class);
-        return rol != null ? rol.toUpperCase() : null;
+        return normalizarRol(rol);
     }
 
     public boolean validateToken(String token) {
@@ -50,19 +50,14 @@ public class JwtUtil {
 
             Claims claims = getClaims(tokenLimpio);
             Date expiration = claims.getExpiration();
+            String username = claims.getSubject();
 
-            return expiration != null && expiration.after(new Date());
+            return username != null
+                    && !username.isBlank()
+                    && expiration != null
+                    && expiration.after(new Date());
         } catch (JwtException | IllegalArgumentException e) {
             return false;
-        }
-    }
-
-    public boolean isTokenExpired(String token) {
-        try {
-            Date expiration = getClaims(limpiarToken(token)).getExpiration();
-            return expiration == null || expiration.before(new Date());
-        } catch (JwtException | IllegalArgumentException e) {
-            return true;
         }
     }
 
@@ -84,5 +79,13 @@ public class JwtUtil {
         }
 
         return token;
+    }
+
+    private String normalizarRol(String rol) {
+        if (rol == null) {
+            return null;
+        }
+
+        return rol.replace("ROLE_", "").trim().toUpperCase();
     }
 }

@@ -1,26 +1,31 @@
 package com.example.sistemagestion.security;
 
-import java.io.IOException;
-import java.util.List;
-
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
-
+import com.example.sistemagestion.model.Usuario;
+import com.example.sistemagestion.repository.UsuarioRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final UsuarioRepository usuarioRepository;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, UsuarioRepository usuarioRepository) {
         this.jwtUtil = jwtUtil;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Override
@@ -50,21 +55,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
 
         try {
-            if (jwtUtil.validateToken(token)) {
+            if (jwtUtil.validateToken(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
                 String username = jwtUtil.extractUsername(token);
-                String rol = jwtUtil.extractRol(token);
+                Optional<Usuario> usuarioOptional = usuarioRepository.findByUsername(username);
 
-                if (username != null && rol != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    String authority = rol.startsWith("ROLE_") ? rol : "ROLE_" + rol;
+                if (usuarioOptional.isPresent() && usuarioOptional.get().isActivo()) {
+                    Usuario usuario = usuarioOptional.get();
+
+                    String rol = usuario.getRol() == null
+                            ? "USER"
+                            : usuario.getRol().replace("ROLE_", "").trim().toUpperCase();
 
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(
-                                    username,
+                                    usuario.getUsername(),
                                     null,
-                                    List.of(new SimpleGrantedAuthority(authority))
+                                    List.of(new SimpleGrantedAuthority("ROLE_" + rol))
                             );
 
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+                } else {
+                    SecurityContextHolder.clearContext();
                 }
             }
         } catch (Exception e) {

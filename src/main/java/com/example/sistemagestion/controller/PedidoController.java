@@ -7,7 +7,6 @@ import com.example.sistemagestion.model.PedidoDetalle;
 import com.example.sistemagestion.model.Producto;
 import com.example.sistemagestion.repository.PedidoRepository;
 import com.example.sistemagestion.repository.ProductoRepository;
-import com.example.sistemagestion.security.JwtUtil;
 import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -28,16 +27,10 @@ public class PedidoController {
 
     private final PedidoRepository pedidoRepository;
     private final ProductoRepository productoRepository;
-    private final JwtUtil jwtUtil;
 
-    public PedidoController(
-            PedidoRepository pedidoRepository,
-            ProductoRepository productoRepository,
-            JwtUtil jwtUtil
-    ) {
+    public PedidoController(PedidoRepository pedidoRepository, ProductoRepository productoRepository) {
         this.pedidoRepository = pedidoRepository;
         this.productoRepository = productoRepository;
-        this.jwtUtil = jwtUtil;
     }
 
     @GetMapping
@@ -82,15 +75,12 @@ public class PedidoController {
 
     @Transactional
     @PostMapping("/checkout")
-    public ResponseEntity<?> checkout(
-            @RequestBody CheckoutPedidoRequest request,
-            @RequestHeader(value = "Authorization", required = false) String authHeader
-    ) {
-        String usuarioActual = obtenerUsuarioDesdeToken(authHeader);
+    public ResponseEntity<?> checkout(@RequestBody CheckoutPedidoRequest request) {
+        String usuarioActual = obtenerUsuarioActual();
 
         if (usuarioActual == null) {
             return ResponseEntity.status(401)
-                    .body(Map.of("mensaje", "Token inválido o usuario no autenticado"));
+                    .body(Map.of("mensaje", "Usuario no autenticado"));
         }
 
         if (request == null || request.getItems() == null || request.getItems().isEmpty()) {
@@ -222,25 +212,5 @@ public class PedidoController {
         }
 
         return username;
-    }
-
-    private String obtenerUsuarioDesdeToken(String authHeader) {
-        String usuarioDesdeContexto = obtenerUsuarioActual();
-
-        if (usuarioDesdeContexto != null) {
-            return usuarioDesdeContexto;
-        }
-
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return null;
-        }
-
-        String token = authHeader.substring(7);
-
-        if (!jwtUtil.validateToken(token)) {
-            return null;
-        }
-
-        return jwtUtil.extractUsername(token);
     }
 }
