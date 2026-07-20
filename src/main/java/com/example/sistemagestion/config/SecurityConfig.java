@@ -5,6 +5,7 @@ import java.util.List;
 import com.example.sistemagestion.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -20,7 +21,35 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @Configuration
 public class SecurityConfig {
 
+    /*
+     * Cadena exclusiva para el checkout.
+     * Esta ruta NO usa JwtAuthenticationFilter.
+     * El token se valida manualmente dentro de PedidoController.
+     */
     @Bean
+    @Order(1)
+    public SecurityFilterChain checkoutSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/api/pedidos/checkout")
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll()
+                );
+
+        return http.build();
+    }
+
+    /*
+     * Cadena general para el resto del sistema.
+     */
+    @Bean
+    @Order(2)
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             JwtAuthenticationFilter jwtAuthenticationFilter
@@ -35,38 +64,25 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // Preflight CORS
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // Ruta interna de errores de Spring Boot
                         .requestMatchers("/error").permitAll()
 
-                        // Login y registro
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // Productos visibles para todos
                         .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
 
-                        // Checkout del carrito:
-                        // Se permite llegar al controlador.
-                        // El PedidoController valida manualmente el JWT del header Authorization.
-                        .requestMatchers(HttpMethod.POST, "/api/pedidos/checkout").permitAll()
-
-                        // Mis pedidos: usuario autenticado
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/mis-pedidos").authenticated()
 
-                        // Gestión general de pedidos: solo ADMIN
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/pedidos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/pedidos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/pedidos/**").hasRole("ADMIN")
 
-                        // Gestión de productos: solo ADMIN
                         .requestMatchers(HttpMethod.POST, "/api/productos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasRole("ADMIN")
 
-                        // Cualquier otra ruta necesita autenticación
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
