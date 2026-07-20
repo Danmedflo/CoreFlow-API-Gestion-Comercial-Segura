@@ -15,7 +15,9 @@ import java.util.Date;
 public class JwtUtil {
 
     private static final String SECRET = "mi_clave_secreta_para_spring_con_jwt_1234567890_segura";
-    private static final long EXPIRATION_TIME = 1000 * 60 * 60;
+
+    // Token válido por 24 horas para evitar cierres durante la demo
+    private static final long EXPIRATION_TIME = 1000L * 60 * 60 * 24;
 
     private final SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
 
@@ -30,19 +32,37 @@ public class JwtUtil {
     }
 
     public String extractUsername(String token) {
-        return getClaims(token).getSubject();
+        return getClaims(limpiarToken(token)).getSubject();
     }
 
     public String extractRol(String token) {
-        return getClaims(token).get("rol", String.class);
+        String rol = getClaims(limpiarToken(token)).get("rol", String.class);
+        return rol != null ? rol.toUpperCase() : null;
     }
 
     public boolean validateToken(String token) {
         try {
-            getClaims(token);
-            return true;
+            String tokenLimpio = limpiarToken(token);
+
+            if (tokenLimpio == null || tokenLimpio.isBlank()) {
+                return false;
+            }
+
+            Claims claims = getClaims(tokenLimpio);
+            Date expiration = claims.getExpiration();
+
+            return expiration != null && expiration.after(new Date());
         } catch (JwtException | IllegalArgumentException e) {
             return false;
+        }
+    }
+
+    public boolean isTokenExpired(String token) {
+        try {
+            Date expiration = getClaims(limpiarToken(token)).getExpiration();
+            return expiration == null || expiration.before(new Date());
+        } catch (JwtException | IllegalArgumentException e) {
+            return true;
         }
     }
 
@@ -52,5 +72,17 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    private String limpiarToken(String token) {
+        if (token == null) {
+            return null;
+        }
+
+        if (token.startsWith("Bearer ")) {
+            return token.substring(7);
+        }
+
+        return token;
     }
 }

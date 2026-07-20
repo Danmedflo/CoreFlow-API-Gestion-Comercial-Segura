@@ -43,11 +43,11 @@ public class SecurityConfig {
                         // Productos visibles para todos
                         .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
 
-                        // Carrito / checkout: cualquier usuario autenticado puede generar pedido
-                        // IMPORTANTE: esta regla debe ir antes de /api/pedidos/**
-                        .requestMatchers(HttpMethod.POST, "/api/pedidos/checkout").authenticated()
+                        // Checkout del carrito.
+                        // Se permite llegar al controlador, y el controlador valida el token manualmente.
+                        .requestMatchers(HttpMethod.POST, "/api/pedidos/checkout").permitAll()
 
-                        // Mis pedidos: cualquier usuario autenticado
+                        // Mis pedidos: usuario autenticado
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/mis-pedidos").authenticated()
 
                         // Gestión general de pedidos: solo ADMIN
