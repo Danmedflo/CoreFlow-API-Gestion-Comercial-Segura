@@ -1,213 +1,285 @@
-<section class="module-header">
-  <div>
-    <span class="eyebrow">Módulo operativo</span>
-    <h2>{{ auth.esAdmin() ? 'Gestión de Pedidos' : 'Mis Pedidos' }}</h2>
-    <p>
-      {{
-        auth.esAdmin()
-          ? 'Supervisa pedidos comerciales, controla estados, consulta clientes y administra operaciones protegidas.'
-          : 'Consulta el historial de pedidos generados desde tu carrito de compras.'
-      }}
-    </p>
-  </div>
-
-  <a *ngIf="auth.esAdmin()" routerLink="/pedidos/nuevo" class="btn btn-primary">
-    Nuevo pedido
-  </a>
-</section>
-
-<section class="summary-grid">
-  <article class="summary-card">
-    <span class="summary-label">Pedidos</span>
-    <strong>{{ pedidos.length }}</strong>
-    <p>Registros encontrados</p>
-  </article>
-
-  <article class="summary-card">
-    <span class="summary-label">Total comercial</span>
-    <strong>S/ {{ totalVentas() | number:'1.2-2' }}</strong>
-    <p>Monto acumulado</p>
-  </article>
-
-  <article class="summary-card">
-    <span class="summary-label">Completados</span>
-    <strong>{{ pedidosCompletados() }}</strong>
-    <p>Pedidos finalizados</p>
-  </article>
-
-  <article class="summary-card">
-    <span class="summary-label">Pendientes</span>
-    <strong>{{ pedidosPendientes() }}</strong>
-    <p>Pedidos por atender</p>
-  </article>
-</section>
-
-<div *ngIf="!auth.esAdmin()" class="notice">
-  Estás visualizando únicamente los pedidos asociados a tu usuario.
-</div>
-
-<section class="panel">
-  <div class="panel-title">
+<section class="pedidos-shell">
+  <div class="pedidos-hero">
     <div>
-      <h3>Filtros de búsqueda</h3>
+      <span class="eyebrow">
+        {{ auth.esAdmin() ? 'PANEL OPERATIVO' : 'MIS COMPRAS' }}
+      </span>
+
+      <h1>
+        {{ auth.esAdmin() ? 'Gestión Operativa de Pedidos' : 'Mis Pedidos' }}
+      </h1>
+
       <p>
         {{
           auth.esAdmin()
-            ? 'Consulta pedidos por cliente o por estado operativo.'
-            : 'Filtra tus pedidos por cliente o por estado.'
+            ? 'Administra el ciclo comercial de los pedidos, controla estados, revisa productos y supervisa el avance operativo.'
+            : 'Consulta el estado y detalle de los pedidos generados desde tu carrito de compras.'
         }}
       </p>
     </div>
 
-    <button type="button" class="btn btn-ghost" (click)="limpiarFiltros()">
-      Limpiar
-    </button>
+    <div class="hero-actions">
+      <a routerLink="/productos" class="btn btn-secondary">
+        Ver productos
+      </a>
+
+      <button type="button" class="btn btn-primary" (click)="cargarPedidos()">
+        Actualizar
+      </button>
+    </div>
   </div>
 
-  <div class="filters">
-    <div class="field">
-      <label for="clienteBusqueda">Cliente</label>
-      <input
-        id="clienteBusqueda"
-        name="clienteBusqueda"
-        type="text"
-        [(ngModel)]="clienteBusqueda"
-        placeholder="Buscar cliente"
-      >
-      <button type="button" class="btn btn-dark" (click)="buscarPorCliente()">
-        Buscar cliente
+  <section *ngIf="auth.esAdmin()" class="metrics-grid">
+    <article class="metric-card">
+      <span>Pedidos</span>
+      <strong>{{ totalPedidosPanel() }}</strong>
+      <p>Total registrados</p>
+    </article>
+
+    <article class="metric-card warning-card">
+      <span>Pendientes</span>
+      <strong>{{ pendientesPanel() }}</strong>
+      <p>Por atender</p>
+    </article>
+
+    <article class="metric-card process-card">
+      <span>En proceso</span>
+      <strong>{{ enProcesoPanel() }}</strong>
+      <p>En atención</p>
+    </article>
+
+    <article class="metric-card success-card">
+      <span>Entregados</span>
+      <strong>{{ entregadosPanel() }}</strong>
+      <p>Finalizados</p>
+    </article>
+
+    <article class="metric-card danger-card">
+      <span>Cancelados</span>
+      <strong>{{ canceladosPanel() }}</strong>
+      <p>Anulados</p>
+    </article>
+
+    <article class="metric-card value-card">
+      <span>Monto vendido</span>
+      <strong>S/ {{ montoVendidoPanel() | number:'1.2-2' }}</strong>
+      <p>Pedidos entregados</p>
+    </article>
+
+    <article class="metric-card value-card">
+      <span>Monto pendiente</span>
+      <strong>S/ {{ montoPendientePanel() | number:'1.2-2' }}</strong>
+      <p>Pendientes y en proceso</p>
+    </article>
+  </section>
+
+  <div *ngIf="!auth.esAdmin()" class="notice">
+    Estás visualizando únicamente los pedidos asociados a tu usuario.
+  </div>
+
+  <section *ngIf="auth.esAdmin()" class="panel filters-panel">
+    <div class="panel-heading">
+      <div>
+        <span class="section-tag">Búsqueda</span>
+        <h2>Filtros administrativos</h2>
+        <p>Ubica pedidos por cliente o por estado operativo.</p>
+      </div>
+
+      <button type="button" class="btn btn-ghost" (click)="limpiarFiltros()">
+        Limpiar filtros
       </button>
     </div>
 
-    <div class="field">
-      <label for="estadoBusqueda">Estado</label>
-      <select
-        id="estadoBusqueda"
-        name="estadoBusqueda"
-        [(ngModel)]="estadoBusqueda"
-      >
-        <option value="">Seleccionar estado</option>
-        <option value="PENDIENTE">PENDIENTE</option>
-        <option value="EN_PROCESO">EN PROCESO</option>
-        <option value="COMPLETADO">COMPLETADO</option>
-        <option value="CANCELADO">CANCELADO</option>
-      </select>
+    <div class="filters-grid">
+      <label>
+        Cliente
+        <input
+          type="text"
+          [(ngModel)]="clienteBusqueda"
+          placeholder="Buscar por cliente"
+          (keyup.enter)="buscarPorCliente()"
+        />
+      </label>
 
-      <button type="button" class="btn btn-dark" (click)="buscarPorEstado()">
+      <label>
+        Estado
+        <select [(ngModel)]="estadoBusqueda">
+          <option value="">Todos los estados</option>
+          <option *ngFor="let estado of estados" [value]="estado">
+            {{ formatearEstado(estado) }}
+          </option>
+        </select>
+      </label>
+
+      <button type="button" class="btn btn-primary" (click)="buscarPorCliente()">
+        Buscar cliente
+      </button>
+
+      <button type="button" class="btn btn-secondary" (click)="buscarPorEstado()">
         Buscar estado
       </button>
     </div>
+  </section>
+
+  <div *ngIf="mensaje" class="alert success-alert">
+    {{ mensaje }}
   </div>
-</section>
 
-<div *ngIf="mensaje" class="alert success">{{ mensaje }}</div>
-<div *ngIf="error" class="alert error">{{ error }}</div>
+  <div *ngIf="error" class="alert error-alert">
+    {{ error }}
+  </div>
 
-<section class="table-section">
-  <div class="table-title">
-    <div>
-      <h3>{{ auth.esAdmin() ? 'Registro de pedidos' : 'Historial de compras' }}</h3>
+  <section class="panel orders-panel">
+    <div class="panel-heading">
+      <div>
+        <span class="section-tag">
+          {{ auth.esAdmin() ? 'Operación' : 'Historial' }}
+        </span>
+
+        <h2>
+          {{ auth.esAdmin() ? 'Ciclo operativo de pedidos' : 'Historial de pedidos' }}
+        </h2>
+
+        <p>
+          {{
+            auth.esAdmin()
+              ? 'Cada pedido avanza mediante reglas de negocio para mantener actualizado el inventario y el proceso comercial.'
+              : 'Aquí aparecen los pedidos confirmados desde tu carrito.'
+          }}
+        </p>
+      </div>
+    </div>
+
+    <div *ngIf="cargando" class="loading">
+      Cargando pedidos...
+    </div>
+
+    <div *ngIf="!cargando && pedidos.length === 0" class="empty-state">
+      <h3>No hay pedidos registrados</h3>
+
       <p>
         {{
           auth.esAdmin()
-            ? 'Listado actualizado de pedidos almacenados en el sistema.'
-            : 'Listado de pedidos generados desde tu carrito de compras.'
+            ? 'Cuando los usuarios confirmen compras, aparecerán aquí para su seguimiento.'
+            : 'Agrega productos al carrito y confirma tu compra para generar un pedido.'
         }}
       </p>
+
+      <a routerLink="/productos" class="btn btn-primary">
+        Ir al catálogo
+      </a>
     </div>
 
-    <button type="button" class="btn btn-ghost" (click)="cargarPedidos()">
-      Actualizar
-    </button>
-  </div>
-
-  <div *ngIf="cargando" class="loading">
-    Cargando información de pedidos...
-  </div>
-
-  <div *ngIf="!cargando && pedidos.length === 0" class="empty-state">
-    <h3>No se encontraron pedidos</h3>
-    <p>No existen registros disponibles o los filtros aplicados no tienen coincidencias.</p>
-  </div>
-
-  <div *ngIf="!cargando && pedidos.length > 0" class="table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th>Cliente</th>
-          <th>Productos</th>
-          <th>Unidades</th>
-          <th>Fecha</th>
-          <th>Total</th>
-          <th>Estado</th>
-          <th *ngIf="auth.esAdmin()">Acciones</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr *ngFor="let pedido of pedidos">
-          <td>
-            <div class="client-cell">
-              <span class="client-avatar">{{ inicialCliente(pedido.cliente) }}</span>
-              <div>
-                <strong>{{ pedido.cliente }}</strong>
-                <small>ID: {{ pedido.id }}</small>
-              </div>
-            </div>
-          </td>
-
-          <td>
-            <strong>{{ resumenProductos(pedido) }}</strong>
-
-            <div *ngIf="detallesPedido(pedido).length > 0" class="order-details">
-              <small *ngFor="let detalle of detallesPedido(pedido)">
-                {{ detalle.productoNombre }} -
-                {{ detalle.cantidad }} und. -
-                S/ {{ detalle.subtotal | number:'1.2-2' }}
-              </small>
+    <div *ngIf="!cargando && pedidos.length > 0" class="orders-list">
+      <article *ngFor="let pedido of pedidos" class="order-card">
+        <div class="order-top">
+          <div class="order-client">
+            <div class="client-avatar">
+              {{ inicialCliente(pedido.cliente) }}
             </div>
 
-            <small *ngIf="detallesPedido(pedido).length === 0 && pedido.productoNombre">
-              Precio unitario: S/ {{ pedido.precioUnitario | number:'1.2-2' }}
-            </small>
-          </td>
+            <div>
+              <span class="order-number">Pedido N.º {{ pedido.id }}</span>
+              <h3>{{ pedido.cliente }}</h3>
+              <p>{{ resumenProductos(pedido) }}</p>
+            </div>
+          </div>
 
-          <td>{{ cantidadTotalItems(pedido) || '-' }}</td>
+          <span class="status-pill" [ngClass]="estadoClass(pedido.estado)">
+            {{ formatearEstado(pedido.estado) }}
+          </span>
+        </div>
 
-          <td>{{ pedido.fecha | date:'dd/MM/yyyy' }}</td>
+        <div class="order-stats">
+          <div>
+            <span>Fecha</span>
+            <strong>{{ pedido.fecha | date:'dd/MM/yyyy' }}</strong>
+          </div>
 
-          <td>
+          <div>
+            <span>Unidades</span>
+            <strong>{{ cantidadTotalItems(pedido) || '-' }}</strong>
+          </div>
+
+          <div>
+            <span>Total</span>
             <strong>S/ {{ pedido.total | number:'1.2-2' }}</strong>
-          </td>
+          </div>
+        </div>
 
-          <td>
-            <span class="status-pill" [ngClass]="estadoClass(pedido.estado)">
-              {{ pedido.estado }}
-            </span>
-          </td>
+        <div *ngIf="detallesPedido(pedido).length > 0" class="details-box">
+          <div class="details-title">
+            Detalle de productos
+          </div>
 
-          <td *ngIf="auth.esAdmin()">
-            <div class="actions">
-              <a [routerLink]="['/pedidos/editar', pedido.id]" class="btn btn-edit">
-                Editar
-              </a>
+          <div class="details-grid details-head">
+            <span>Producto</span>
+            <span>Cantidad</span>
+            <span>Precio</span>
+            <span>Subtotal</span>
+          </div>
 
-              <button type="button" class="btn btn-danger" (click)="abrirConfirmacionEliminar(pedido)">
-                Eliminar
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+          <div *ngFor="let detalle of detallesPedido(pedido)" class="details-grid">
+            <span>{{ detalle.productoNombre }}</span>
+            <span>{{ detalle.cantidad }}</span>
+            <span>S/ {{ detalle.precioUnitario | number:'1.2-2' }}</span>
+            <span>S/ {{ detalle.subtotal | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="auth.esAdmin()" class="admin-actions">
+          <div class="state-control">
+            <label>Estado operativo</label>
+
+            <select
+              [ngModel]="estadoSeleccionado[pedido.id || 0]"
+              (ngModelChange)="seleccionarEstado(pedido, $event)"
+              [disabled]="!puedeGestionarEstado(pedido)"
+            >
+              <option [value]="pedido.estado">
+                {{ formatearEstado(pedido.estado) }}
+              </option>
+
+              <option *ngFor="let estado of estadosPermitidos(pedido)" [value]="estado">
+                {{ formatearEstado(estado) }}
+              </option>
+            </select>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="!puedeGestionarEstado(pedido)"
+            (click)="actualizarEstadoPedido(pedido)"
+          >
+            Guardar estado
+          </button>
+
+          <a
+            [routerLink]="['/pedidos/operativo', pedido.id]"
+            class="btn btn-secondary"
+          >
+            Editar contenido
+          </a>
+
+          <button
+            type="button"
+            class="btn btn-danger"
+            (click)="abrirConfirmacionEliminar(pedido)"
+          >
+            Eliminar
+          </button>
+        </div>
+      </article>
+    </div>
+  </section>
 </section>
 
 <app-confirm-modal
   *ngIf="pedidoAEliminar"
   [visible]="true"
   titulo="Eliminar pedido"
-  [mensaje]="'¿Deseas eliminar el pedido del cliente ' + pedidoAEliminar.cliente + '?'"
+  [mensaje]="'¿Deseas eliminar el pedido N.º ' + pedidoAEliminar.id + '?'"
   detalle="Esta acción eliminará el pedido seleccionado del sistema."
   textoConfirmar="Eliminar"
   textoCancelar="Cancelar"

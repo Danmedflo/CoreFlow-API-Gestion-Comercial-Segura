@@ -1,0 +1,187 @@
+<section class="operativo-shell">
+  <div class="operativo-hero">
+    <div>
+      <span class="eyebrow">EDICIÓN OPERATIVA</span>
+
+      <h1>Editar contenido del pedido</h1>
+
+      <p>
+        Modifica productos, cantidades y composición del pedido. El sistema recalcula
+        el total y actualiza el stock de manera automática.
+      </p>
+    </div>
+
+    <button type="button" class="btn btn-ghost" (click)="volver()">
+      Volver a pedidos
+    </button>
+  </div>
+
+  <div *ngIf="mensaje" class="alert success-alert">
+    {{ mensaje }}
+  </div>
+
+  <div *ngIf="error" class="alert error-alert">
+    {{ error }}
+  </div>
+
+  <section *ngIf="cargando" class="panel loading-panel">
+    Cargando información del pedido...
+  </section>
+
+  <section *ngIf="!cargando && pedido" class="pedido-summary-grid">
+    <article class="summary-card">
+      <span>Pedido</span>
+      <strong>N.º {{ pedido.id }}</strong>
+      <p>Identificador operativo</p>
+    </article>
+
+    <article class="summary-card">
+      <span>Cliente</span>
+      <strong>{{ pedido.cliente }}</strong>
+      <p>Usuario comprador</p>
+    </article>
+
+    <article class="summary-card" [ngClass]="puedeEditar() ? 'active-card' : 'closed-card'">
+      <span>Estado</span>
+      <strong>{{ estadoFormateado() }}</strong>
+      <p>{{ puedeEditar() ? 'Editable por administración' : 'Pedido cerrado' }}</p>
+    </article>
+
+    <article class="summary-card value-card">
+      <span>Total estimado</span>
+      <strong>S/ {{ totalEstimado() | number:'1.2-2' }}</strong>
+      <p>Total recalculado</p>
+    </article>
+  </section>
+
+  <section *ngIf="!cargando && pedido" class="panel operativo-panel">
+    <div class="panel-heading">
+      <div>
+        <span class="section-tag">Contenido del pedido</span>
+
+        <h2>Productos incluidos</h2>
+
+        <p>
+          Agrega nuevos productos, elimina productos existentes o cambia cantidades.
+          Los cambios se validan contra el stock disponible.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        [disabled]="!puedeEditar()"
+        (click)="agregarProducto()"
+      >
+        Agregar producto
+      </button>
+    </div>
+
+    <div *ngIf="!puedeEditar()" class="alert error-alert">
+      Este pedido está {{ estadoFormateado() }} y ya no puede modificarse.
+    </div>
+
+    <div *ngIf="productos.length === 0" class="alert error-alert">
+      No hay productos disponibles para agregar al pedido.
+    </div>
+
+    <div class="items-editor">
+      <article *ngFor="let item of items; let i = index" class="item-card">
+        <div class="item-number">
+          {{ i + 1 }}
+        </div>
+
+        <div class="item-content">
+          <div class="item-main">
+            <label class="field product-field">
+              Producto
+
+              <select [(ngModel)]="item.productoId" [disabled]="!puedeEditar()">
+                <option [ngValue]="null">Selecciona un producto</option>
+
+                <option *ngFor="let producto of productos" [ngValue]="producto.id">
+                  {{ producto.nombre }} | Stock: {{ producto.stock }} | S/ {{ producto.precio | number:'1.2-2' }}
+                </option>
+              </select>
+            </label>
+
+            <label class="field quantity-field">
+              Cantidad
+
+              <input
+                type="number"
+                min="1"
+                [(ngModel)]="item.cantidad"
+                [disabled]="!puedeEditar()"
+              />
+            </label>
+          </div>
+
+          <div *ngIf="productoSeleccionado(item.productoId) as producto" class="selected-product">
+            <div>
+              <span>Producto seleccionado</span>
+              <strong>{{ producto.nombre }}</strong>
+              <p>{{ producto.categoria || 'Sin categoría' }}</p>
+            </div>
+
+            <div>
+              <span>Stock actual</span>
+              <strong>{{ producto.stock }}</strong>
+              <p>unidades disponibles</p>
+            </div>
+
+            <div>
+              <span>Precio unitario</span>
+              <strong>S/ {{ producto.precio | number:'1.2-2' }}</strong>
+              <p>precio registrado</p>
+            </div>
+
+            <div>
+              <span>Subtotal</span>
+              <strong>
+                S/ {{ ((producto.precio || 0) * (item.cantidad || 0)) | number:'1.2-2' }}
+              </strong>
+              <p>cálculo parcial</p>
+            </div>
+          </div>
+
+          <div *ngIf="!productoSeleccionado(item.productoId)" class="selected-product empty-product">
+            <p>Selecciona un producto para calcular precio, stock y subtotal.</p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-danger remove-btn"
+          [disabled]="!puedeEditar()"
+          (click)="quitarProducto(i)"
+        >
+          Quitar
+        </button>
+      </article>
+    </div>
+
+    <div class="operativo-footer">
+      <div class="total-resume">
+        <span>Total del pedido</span>
+        <strong>S/ {{ totalEstimado() | number:'1.2-2' }}</strong>
+        <p>Se actualizará al guardar los cambios.</p>
+      </div>
+
+      <div class="operativo-actions">
+        <button type="button" class="btn btn-ghost" (click)="volver()">
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="!puedeEditar() || guardando"
+          (click)="guardarCambios()"
+        >
+          {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </div>
+    </div>
+  </section>
+</section>

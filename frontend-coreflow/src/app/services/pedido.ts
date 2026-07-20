@@ -1,5 +1,5 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface PedidoDetalleModel {
@@ -34,6 +34,29 @@ export interface CheckoutPedidoRequest {
   items: ItemCarritoRequest[];
 }
 
+export interface PedidoPanelResumen {
+  totalPedidos: number;
+  pedidosPendientes: number;
+  pedidosEnProceso: number;
+  pedidosEntregados: number;
+  pedidosCancelados: number;
+  montoTotalVendido: number;
+  montoPendiente: number;
+}
+
+export interface ActualizarEstadoPedidoRequest {
+  estado: string;
+}
+
+export interface ActualizarPedidoOperativoRequest {
+  items: ItemCarritoRequest[];
+}
+
+export interface PedidoOperacionResponse {
+  mensaje: string;
+  pedido: PedidoModel;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -45,7 +68,7 @@ export class Pedido {
     return this.http.get<PedidoModel[]>(this.apiUrl);
   }
 
-  misPedidos(): Observable<PedidoModel[]> {
+  listarMisPedidos(): Observable<PedidoModel[]> {
     return this.http.get<PedidoModel[]>(`${this.apiUrl}/mis-pedidos`);
   }
 
@@ -65,15 +88,33 @@ export class Pedido {
     return this.http.put<PedidoModel>(`${this.apiUrl}/${id}`, pedido);
   }
 
+  actualizarEstado(
+    id: number,
+    request: ActualizarEstadoPedidoRequest
+  ): Observable<PedidoOperacionResponse> {
+    return this.http.put<PedidoOperacionResponse>(`${this.apiUrl}/${id}/estado`, request);
+  }
+
+  actualizarPedidoOperativo(
+    id: number,
+    request: ActualizarPedidoOperativoRequest
+  ): Observable<PedidoOperacionResponse> {
+    return this.http.put<PedidoOperacionResponse>(`${this.apiUrl}/${id}/operativo`, request);
+  }
+
   eliminar(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  buscarPorEstado(estado: string): Observable<PedidoModel[]> {
+    return this.http.get<PedidoModel[]>(`${this.apiUrl}/estado/${encodeURIComponent(estado)}`);
   }
 
   buscarPorCliente(cliente: string): Observable<PedidoModel[]> {
     return this.http.get<PedidoModel[]>(`${this.apiUrl}/buscar?cliente=${encodeURIComponent(cliente)}`);
   }
 
-  buscarPorEstado(estado: string): Observable<PedidoModel[]> {
-    return this.http.get<PedidoModel[]>(`${this.apiUrl}/estado/${encodeURIComponent(estado)}`);
+  obtenerPanelResumen(): Observable<PedidoPanelResumen> {
+    return this.http.get<PedidoPanelResumen>(`${this.apiUrl}/panel/resumen`);
   }
 }
