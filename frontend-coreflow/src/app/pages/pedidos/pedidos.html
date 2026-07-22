@@ -12,8 +12,8 @@
       <p>
         {{
           auth.esAdmin()
-            ? 'Administra el ciclo comercial de los pedidos, controla estados, revisa productos y supervisa el avance operativo.'
-            : 'Consulta el estado y detalle de los pedidos generados desde tu carrito de compras.'
+            ? 'Administra el ciclo comercial de los pedidos, controla estados, revisa productos, pagos y comprobantes.'
+            : 'Consulta tus pedidos, confirma pagos y revisa los comprobantes generados.'
         }}
       </p>
     </div>
@@ -143,7 +143,7 @@
         <p>
           {{
             auth.esAdmin()
-              ? 'Cada pedido avanza mediante reglas de negocio para mantener actualizado el inventario y el proceso comercial.'
+              ? 'Cada pedido avanza mediante reglas de negocio para mantener actualizado el inventario, el pago y el comprobante.'
               : 'Aquí aparecen los pedidos confirmados desde tu carrito.'
           }}
         </p>
@@ -185,9 +185,19 @@
             </div>
           </div>
 
-          <span class="status-pill" [ngClass]="estadoClass(pedido.estado)">
-            {{ formatearEstado(pedido.estado) }}
-          </span>
+          <div class="status-group">
+            <span class="status-pill" [ngClass]="estadoClass(pedido.estado)">
+              {{ formatearEstado(pedido.estado) }}
+            </span>
+
+            <span *ngIf="tieneComprobante(pedido)" class="payment-pill paid-pill">
+              Pagado
+            </span>
+
+            <span *ngIf="!tieneComprobante(pedido)" class="payment-pill pending-payment-pill">
+              Pendiente de pago
+            </span>
+          </div>
         </div>
 
         <div class="order-stats">
@@ -263,12 +273,56 @@
           </a>
 
           <button
+            *ngIf="puedeCancelarPedido(pedido)"
+            type="button"
+            class="btn btn-warning"
+            (click)="abrirConfirmacionCancelar(pedido)"
+          >
+            Cancelar pedido
+          </button>
+
+          <a
+            *ngIf="puedeVerComprobante(pedido)"
+            [routerLink]="['/comprobantes/pedido', pedido.id]"
+            class="btn btn-success"
+          >
+            Ver comprobante
+          </a>
+
+          <button
             type="button"
             class="btn btn-danger"
             (click)="abrirConfirmacionEliminar(pedido)"
           >
             Eliminar
           </button>
+        </div>
+
+        <div *ngIf="!auth.esAdmin()" class="user-payment-actions">
+          <a
+            *ngIf="puedePagarPedido(pedido)"
+            [routerLink]="['/pagos/confirmar', pedido.id]"
+            class="btn btn-primary"
+          >
+            Pagar pedido
+          </a>
+
+          <button
+            *ngIf="puedeCancelarPedido(pedido)"
+            type="button"
+            class="btn btn-warning"
+            (click)="abrirConfirmacionCancelar(pedido)"
+          >
+            Cancelar pedido
+          </button>
+
+          <a
+            *ngIf="puedeVerComprobante(pedido)"
+            [routerLink]="['/comprobantes/pedido', pedido.id]"
+            class="btn btn-success"
+          >
+            Ver comprobante
+          </a>
         </div>
       </article>
     </div>
@@ -285,4 +339,16 @@
   textoCancelar="Cancelar"
   (confirmar)="confirmarEliminacion()"
   (cancelar)="cancelarEliminacion()"
+></app-confirm-modal>
+
+<app-confirm-modal
+  *ngIf="pedidoACancelar"
+  [visible]="true"
+  titulo="Cancelar pedido"
+  [mensaje]="'¿Deseas cancelar el pedido N.º ' + pedidoACancelar.id + '?'"
+  detalle="El pedido pasará a estado CANCELADO y el stock de los productos será devuelto al inventario."
+  textoConfirmar="Cancelar pedido"
+  textoCancelar="Volver"
+  (confirmar)="confirmarCancelacionPedido()"
+  (cancelar)="cerrarConfirmacionCancelar()"
 ></app-confirm-modal>

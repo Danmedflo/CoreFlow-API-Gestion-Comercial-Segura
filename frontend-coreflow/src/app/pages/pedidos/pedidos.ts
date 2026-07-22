@@ -11,6 +11,8 @@ import {
 } from '../../services/pedido';
 import { Auth } from '../../services/auth';
 import { ConfirmModal } from '../../components/confirm-modal/confirm-modal';
+import { Comprobante } from '../../services/comprobante';
+import { ComprobanteModel } from '../../services/pago';
 
 @Component({
   selector: 'app-pedidos',
@@ -20,6 +22,7 @@ import { ConfirmModal } from '../../components/confirm-modal/confirm-modal';
 })
 export class Pedidos implements OnInit {
   private pedidoService = inject(Pedido);
+  private comprobanteService = inject(Comprobante);
 
   auth = inject(Auth);
 
@@ -27,7 +30,9 @@ export class Pedidos implements OnInit {
   panelResumen: PedidoPanelResumen | null = null;
 
   pedidoAEliminar: PedidoModel | null = null;
+  pedidoACancelar: PedidoModel | null = null;
   estadoSeleccionado: Record<number, string> = {};
+  comprobantesPorPedido: Record<number, ComprobanteModel> = {};
 
   clienteBusqueda = '';
   estadoBusqueda = '';
@@ -57,6 +62,7 @@ export class Pedidos implements OnInit {
         this.pedidos = data;
         this.inicializarEstados();
         this.cargando = false;
+        this.cargarComprobantes();
 
         if (this.auth.esAdmin()) {
           this.cargarPanelAdministrativo();
@@ -87,6 +93,32 @@ export class Pedidos implements OnInit {
       error: () => {
         this.panelResumen = null;
         this.cargandoPanel = false;
+      }
+    });
+  }
+
+  cargarComprobantes(): void {
+    if (!this.auth.estaAutenticado()) {
+      this.comprobantesPorPedido = {};
+      return;
+    }
+
+    const consulta = this.auth.esAdmin()
+      ? this.comprobanteService.listar()
+      : this.comprobanteService.listarMisComprobantes();
+
+    consulta.subscribe({
+      next: (comprobantes: ComprobanteModel[]) => {
+        this.comprobantesPorPedido = {};
+
+        comprobantes.forEach((comprobante) => {
+          if (comprobante.pedidoId) {
+            this.comprobantesPorPedido[comprobante.pedidoId] = comprobante;
+          }
+        });
+      },
+      error: () => {
+        this.comprobantesPorPedido = {};
       }
     });
   }
@@ -169,6 +201,7 @@ export class Pedidos implements OnInit {
         this.pedidos = data;
         this.inicializarEstados();
         this.cargando = false;
+        this.cargarComprobantes();
       },
       error: () => {
         this.error = 'No se pudo buscar pedidos por cliente.';
@@ -198,6 +231,7 @@ export class Pedidos implements OnInit {
         this.pedidos = data;
         this.inicializarEstados();
         this.cargando = false;
+        this.cargarComprobantes();
       },
       error: () => {
         this.error = 'No se pudo buscar pedidos por estado.';
@@ -225,6 +259,53 @@ export class Pedidos implements OnInit {
     this.pedidoAEliminar = null;
   }
 
+  abrirConfirmacionCancelar(pedido: PedidoModel): void {
+    if (!this.puedeCancelarPedido(pedido)) {
+      this.error = 'Este pedido no puede cancelarse porque no está pendiente o ya tiene pago registrado.';
+      return;
+    }
+
+    this.pedidoACancelar = pedido;
+  }
+
+  cerrarConfirmacionCancelar(): void {
+    this.pedidoACancelar = null;
+  }
+
+  confirmarCancelacionPedido(): void {
+    const id = this.pedidoACancelar?.id;
+
+    if (!id) {
+      return;
+    }
+
+    this.pedidoService.cancelarPedido(id).subscribe({
+      next: (response) => {
+        this.mensaje = response.mensaje || 'Pedido cancelado correctamente.';
+        this.error = '';
+
+        this.pedidos = this.pedidos.map((pedido) =>
+          pedido.id === id ? response.pedido : pedido
+        );
+
+        this.pedidoACancelar = null;
+        this.inicializarEstados();
+        this.cargarComprobantes();
+
+        if (this.auth.esAdmin()) {
+          this.cargarPanelAdministrativo();
+        }
+      },
+      error: (err: any) => {
+        this.error =
+          err?.error?.mensaje ||
+          'No se pudo cancelar el pedido. Verifica el estado del pedido.';
+
+        this.pedidoACancelar = null;
+      }
+    });
+  }
+
   confirmarEliminacion(): void {
     const id = this.pedidoAEliminar?.id;
 
@@ -239,6 +320,7 @@ export class Pedidos implements OnInit {
         this.error = '';
         this.pedidoAEliminar = null;
         this.cargarPanelAdministrativo();
+        this.cargarComprobantes();
       },
       error: () => {
         this.error = 'No se pudo eliminar el pedido. Verifica tu sesión ADMIN.';
@@ -263,6 +345,34 @@ export class Pedidos implements OnInit {
 
   puedeGestionarEstado(pedido: PedidoModel): boolean {
     return this.auth.esAdmin() && this.estadosPermitidos(pedido).length > 0;
+  }
+
+  tieneComprobante(pedido: PedidoModel): boolean {
+    if (!pedido.id) {
+      return false;
+    }
+
+    return !!this.comprobantesPorPedido[pedido.id];
+  }
+
+  puedePagarPedido(pedido: PedidoModel): boolean {
+    const estado = this.normalizarEstado(pedido.estado);
+
+    return !this.auth.esAdmin()
+      && estado !== 'CANCELADO'
+      && !this.tieneComprobante(pedido);
+  }
+
+  puedeCancelarPedido(pedido: PedidoModel): boolean {
+    const estado = this.normalizarEstado(pedido.estado);
+
+    return !this.auth.esAdmin()
+      && estado === 'PENDIENTE'
+      && !this.tieneComprobante(pedido);
+  }
+
+  puedeVerComprobante(pedido: PedidoModel): boolean {
+    return !!pedido.id && this.tieneComprobante(pedido);
   }
 
   estadoClass(estado: string): string {
@@ -366,24 +476,6 @@ export class Pedidos implements OnInit {
           return estado === 'PENDIENTE' || estado === 'EN_PROCESO';
         })
         .reduce((total, pedido) => total + Number(pedido.total || 0), 0);
-  }
-
-  totalVentas(): number {
-    return this.pedidos.reduce((total, pedido) => total + Number(pedido.total || 0), 0);
-  }
-
-  pedidosCompletados(): number {
-    return this.pedidos.filter((pedido) => {
-      const estado = this.normalizarEstado(pedido.estado);
-      return estado === 'ENTREGADO' || estado === 'COMPLETADO';
-    }).length;
-  }
-
-  pedidosPendientes(): number {
-    return this.pedidos.filter((pedido) => {
-      const estado = this.normalizarEstado(pedido.estado);
-      return estado === 'PENDIENTE' || estado === 'EN_PROCESO';
-    }).length;
   }
 
   inicialCliente(cliente: string): string {

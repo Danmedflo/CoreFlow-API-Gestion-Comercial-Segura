@@ -73,7 +73,7 @@ export class Pedido {
   }
 
   obtenerPorId(id: number): Observable<PedidoModel> {
-    return this.http.get<PedidoModel>(`${this.apiUrl}/${id}`);
+    return this.http.get<PedidoModel>(`${this.apiUrl}/detalle/${id}`);
   }
 
   crear(pedido: PedidoModel): Observable<PedidoModel> {
@@ -100,6 +100,10 @@ export class Pedido {
     request: ActualizarPedidoOperativoRequest
   ): Observable<PedidoOperacionResponse> {
     return this.http.put<PedidoOperacionResponse>(`${this.apiUrl}/${id}/operativo`, request);
+  }
+
+  cancelarPedido(id: number): Observable<PedidoOperacionResponse> {
+    return this.http.put<PedidoOperacionResponse>(`${this.apiUrl}/${id}/cancelar`, {});
   }
 
   eliminar(id: number): Observable<void> {

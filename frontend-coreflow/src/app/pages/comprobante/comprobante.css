@@ -1,0 +1,378 @@
+.comprobante-shell {
+  display: grid;
+  gap: 24px;
+  padding: 28px;
+}
+
+.comprobante-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 30px;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.16), transparent 32%),
+    linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.08);
+}
+
+.eyebrow {
+  display: inline-flex;
+  margin-bottom: 10px;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.comprobante-hero h1 {
+  margin: 0;
+  color: #0f172a;
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1.05;
+}
+
+.comprobante-hero p {
+  max-width: 760px;
+  margin: 12px 0 0;
+  color: #64748b;
+  font-weight: 650;
+  line-height: 1.65;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.panel,
+.invoice-card {
+  padding: 28px;
+  border-radius: 26px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+}
+
+.loading-panel {
+  color: #64748b;
+  font-weight: 800;
+  text-align: center;
+}
+
+.invoice-card {
+  max-width: 1050px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.brand {
+  display: inline-flex;
+  color: #2563eb;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.invoice-header h2 {
+  margin: 8px 0 0;
+  color: #0f172a;
+  font-size: 38px;
+}
+
+.invoice-header p {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.invoice-number {
+  min-width: 260px;
+  padding: 18px;
+  border-radius: 20px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  text-align: right;
+}
+
+.invoice-number span,
+.invoice-info-grid span,
+.client-grid span,
+.totals-card span {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.invoice-number strong {
+  display: block;
+  margin-top: 7px;
+  color: #1d4ed8;
+  font-size: 22px;
+}
+
+.invoice-info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.invoice-info-grid article {
+  padding: 16px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.invoice-info-grid strong {
+  display: block;
+  margin-top: 8px;
+  color: #0f172a;
+  font-size: 18px;
+  word-break: break-word;
+}
+
+.invoice-info-grid p {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.client-box,
+.products-box {
+  margin-top: 26px;
+}
+
+.client-box h3,
+.products-box h3 {
+  margin: 0 0 14px;
+  color: #0f172a;
+  font-size: 22px;
+}
+
+.client-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.client-grid div {
+  padding: 16px;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+.client-grid strong {
+  display: block;
+  margin-top: 8px;
+  color: #0f172a;
+  font-size: 16px;
+  word-break: break-word;
+}
+
+.products-table {
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.product-row {
+  display: grid;
+  grid-template-columns: 1.7fr 0.7fr 0.8fr 0.8fr;
+  gap: 12px;
+  padding: 14px 16px;
+  color: #334155;
+  font-weight: 750;
+  border-top: 1px solid #eef2f7;
+}
+
+.product-row:first-child {
+  border-top: 0;
+}
+
+.product-head {
+  color: #64748b;
+  background: #f8fafc;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.totals-section {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 26px;
+}
+
+.totals-card {
+  min-width: 330px;
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 20px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.totals-card div {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.totals-card strong {
+  color: #0f172a;
+}
+
+.grand-total {
+  margin-top: 8px;
+  padding: 16px;
+  border-radius: 18px;
+  color: #1e3a8a;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.grand-total strong {
+  color: #1d4ed8;
+  font-size: 22px;
+}
+
+.invoice-note {
+  margin-top: 24px;
+  padding: 16px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+}
+
+.invoice-note p {
+  margin: 0;
+  color: #64748b;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.alert {
+  padding: 15px 18px;
+  border-radius: 18px;
+  font-weight: 800;
+}
+
+.error-alert {
+  color: #991b1b;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+}
+
+.btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  color: #ffffff;
+  background: #2563eb;
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.24);
+}
+
+.btn-ghost {
+  color: #334155;
+  background: #f1f5f9;
+}
+
+@media print {
+  .no-print,
+  .comprobante-hero {
+    display: none !important;
+  }
+
+  .comprobante-shell {
+    padding: 0;
+  }
+
+  .invoice-card {
+    max-width: none;
+    box-shadow: none;
+    border: 0;
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .invoice-header,
+  .comprobante-hero {
+    flex-direction: column;
+  }
+
+  .invoice-number {
+    text-align: left;
+  }
+
+  .invoice-info-grid,
+  .client-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .product-row {
+    grid-template-columns: 1fr;
+  }
+
+  .product-head {
+    display: none;
+  }
+}
+
+@media (max-width: 650px) {
+  .comprobante-shell {
+    padding: 18px;
+  }
+
+  .invoice-info-grid,
+  .client-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .totals-section {
+    justify-content: stretch;
+  }
+
+  .totals-card {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .hero-actions,
+  .hero-actions .btn {
+    width: 100%;
+  }
+}

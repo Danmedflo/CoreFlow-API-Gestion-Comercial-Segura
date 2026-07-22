@@ -21,11 +21,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @Configuration
 public class SecurityConfig {
 
-    /*
-     * Cadena exclusiva para el checkout.
-     * Esta ruta NO usa JwtAuthenticationFilter.
-     * El token se valida manualmente dentro de PedidoController.
-     */
     @Bean
     @Order(1)
     public SecurityFilterChain checkoutSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -45,9 +40,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /*
-     * Cadena general para el resto del sistema.
-     */
     @Bean
     @Order(2)
     public SecurityFilterChain securityFilterChain(
@@ -65,16 +57,26 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
                         .requestMatchers("/error").permitAll()
 
                         .requestMatchers("/api/auth/**").permitAll()
 
+                        .requestMatchers(HttpMethod.POST, "/api/pagos/confirmar/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/pagos/mis-pagos").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/pagos/pedido/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/pagos/**").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/comprobantes/mis-comprobantes").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/comprobantes/pedido/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/comprobantes/*").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/comprobantes/**").hasRole("ADMIN")
+
                         .requestMatchers(HttpMethod.GET, "/api/productos/panel/**").hasRole("ADMIN")
-                        
                         .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/mis-pedidos").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/pedidos/detalle/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/pedidos/*/cancelar").authenticated()
 
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/pedidos/**").hasRole("ADMIN")

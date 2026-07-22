@@ -1,0 +1,162 @@
+<section class="pago-shell">
+  <div class="pago-hero">
+    <div>
+      <span class="eyebrow">CONFIRMACIÓN DE PAGO</span>
+
+      <h1>Confirmar pago del pedido</h1>
+
+      <p>
+        Registra el método de pago y el tipo de comprobante. Al confirmar, el sistema
+        generará automáticamente la boleta o factura interna del pedido.
+      </p>
+    </div>
+
+    <button type="button" class="btn btn-ghost" (click)="volver()">
+      Volver a pedidos
+    </button>
+  </div>
+
+  <div *ngIf="mensaje" class="alert success-alert">
+    {{ mensaje }}
+  </div>
+
+  <div *ngIf="error" class="alert error-alert">
+    {{ error }}
+  </div>
+
+  <section *ngIf="cargando" class="panel loading-panel">
+    Cargando pedido...
+  </section>
+
+  <section *ngIf="!cargando && pedido" class="pago-layout">
+    <div class="panel payment-panel">
+      <div class="panel-heading">
+        <span class="section-tag">Datos de pago</span>
+        <h2>Información del pago</h2>
+        <p>Completa los datos para registrar el pago del pedido seleccionado.</p>
+      </div>
+
+      <div class="form-grid">
+        <label class="field">
+          Método de pago
+          <select [(ngModel)]="metodoPago">
+            <option *ngFor="let metodo of metodosPago" [value]="metodo">
+              {{ metodo }}
+            </option>
+          </select>
+        </label>
+
+        <label class="field">
+          Tipo de comprobante
+          <select [(ngModel)]="tipoComprobante">
+            <option *ngFor="let tipo of tiposComprobante" [value]="tipo">
+              {{ tipo }}
+            </option>
+          </select>
+        </label>
+
+        <label class="field" *ngIf="tipoComprobante === 'BOLETA'">
+          DNI / Documento
+          <input
+            type="text"
+            [(ngModel)]="documentoCliente"
+            placeholder="Opcional"
+            maxlength="12"
+          />
+        </label>
+
+        <ng-container *ngIf="esFactura()">
+          <label class="field full-field">
+            Razón social
+            <input
+              type="text"
+              [(ngModel)]="razonSocial"
+              placeholder="Ejemplo: Comercial CoreFlow S.A.C."
+            />
+          </label>
+
+          <label class="field">
+            RUC
+            <input
+              type="text"
+              [(ngModel)]="ruc"
+              placeholder="11 dígitos"
+              maxlength="11"
+            />
+          </label>
+
+          <label class="field">
+            Dirección fiscal
+            <input
+              type="text"
+              [(ngModel)]="direccionFiscal"
+              placeholder="Opcional"
+            />
+          </label>
+        </ng-container>
+      </div>
+
+      <div class="payment-actions">
+        <button type="button" class="btn btn-ghost" (click)="volver()">
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="pagando"
+          (click)="confirmarPago()"
+        >
+          {{ pagando ? 'Confirmando...' : 'Confirmar pago' }}
+        </button>
+      </div>
+    </div>
+
+    <aside class="panel order-summary">
+      <div class="summary-header">
+        <span class="section-tag">Resumen</span>
+        <h2>Pedido N.º {{ pedido.id }}</h2>
+        <p>Cliente: {{ pedido.cliente }}</p>
+      </div>
+
+      <div class="summary-status">
+        <span>Estado del pedido</span>
+        <strong>{{ estadoFormateado() }}</strong>
+      </div>
+
+      <div class="summary-products">
+        <h3>Productos</h3>
+
+        <div *ngIf="detallesPedido().length === 0" class="empty-products">
+          No hay detalle de productos disponible.
+        </div>
+
+        <div *ngFor="let detalle of detallesPedido()" class="product-line">
+          <div>
+            <strong>{{ detalle.productoNombre }}</strong>
+            <span>{{ detalle.cantidad }} und. x S/ {{ detalle.precioUnitario | number:'1.2-2' }}</span>
+          </div>
+
+          <strong>S/ {{ detalle.subtotal | number:'1.2-2' }}</strong>
+        </div>
+      </div>
+
+      <div class="totals-box">
+        <div>
+          <span>Subtotal</span>
+          <strong>S/ {{ subtotal() | number:'1.2-2' }}</strong>
+        </div>
+
+        <div>
+          <span>IGV 18%</span>
+          <strong>S/ {{ igv() | number:'1.2-2' }}</strong>
+        </div>
+
+        <div class="grand-total">
+          <span>Total a pagar</span>
+          <strong>S/ {{ totalPedido() | number:'1.2-2' }}</strong>
+        </div>
+      </div>
+    </aside>
+  </section>
+</section>

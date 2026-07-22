@@ -7,6 +7,8 @@ import { Productos } from './pages/productos/productos';
 import { ProductoForm } from './pages/producto-form/producto-form';
 import { Pedidos } from './pages/pedidos/pedidos';
 import { PedidoOperativoPage } from './pages/pedido-operativo/pedido-operativo';
+import { PagoConfirmacionPage } from './pages/pago-confirmacion/pago-confirmacion';
+import { ComprobantePage } from './pages/comprobante/comprobante';
 import { CarritoPage } from './pages/carrito/carrito';
 import { PerfilPage } from './pages/perfil/perfil';
 import { NotFound } from './pages/not-found/not-found';
@@ -52,6 +54,25 @@ export const routes: Routes = [
     component: PedidoOperativoPage,
     title: 'Edición operativa de pedido',
     canActivate: [adminGuard]
+  },
+
+  {
+    path: 'pagos/confirmar/:pedidoId',
+    component: PagoConfirmacionPage,
+    title: 'Confirmar pago',
+    canActivate: [authGuard]
+  },
+  {
+    path: 'comprobantes/pedido/:pedidoId',
+    component: ComprobantePage,
+    title: 'Comprobante de pedido',
+    canActivate: [authGuard]
+  },
+  {
+    path: 'comprobantes/:id',
+    component: ComprobantePage,
+    title: 'Comprobante',
+    canActivate: [authGuard]
   },
 
   {

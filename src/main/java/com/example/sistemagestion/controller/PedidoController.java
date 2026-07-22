@@ -8,6 +8,8 @@ import com.example.sistemagestion.dto.PedidoPanelResponse;
 import com.example.sistemagestion.model.Pedido;
 import com.example.sistemagestion.model.PedidoDetalle;
 import com.example.sistemagestion.model.Producto;
+import com.example.sistemagestion.repository.ComprobanteRepository;
+import com.example.sistemagestion.repository.PagoRepository;
 import com.example.sistemagestion.repository.PedidoRepository;
 import com.example.sistemagestion.repository.ProductoRepository;
 import com.example.sistemagestion.security.JwtUtil;
@@ -34,15 +36,21 @@ public class PedidoController {
 
     private final PedidoRepository pedidoRepository;
     private final ProductoRepository productoRepository;
+    private final PagoRepository pagoRepository;
+    private final ComprobanteRepository comprobanteRepository;
     private final JwtUtil jwtUtil;
 
     public PedidoController(
             PedidoRepository pedidoRepository,
             ProductoRepository productoRepository,
+            PagoRepository pagoRepository,
+            ComprobanteRepository comprobanteRepository,
             JwtUtil jwtUtil
     ) {
         this.pedidoRepository = pedidoRepository;
         this.productoRepository = productoRepository;
+        this.pagoRepository = pagoRepository;
+        this.comprobanteRepository = comprobanteRepository;
         this.jwtUtil = jwtUtil;
     }
 
@@ -112,6 +120,36 @@ public class PedidoController {
 
         List<Pedido> pedidos = pedidoRepository.findByClienteIgnoreCase(usuarioActual);
         return ResponseEntity.ok(pedidos);
+    }
+
+    @GetMapping("/detalle/{id}")
+    public ResponseEntity<?> obtenerDetallePorId(
+            @PathVariable Long id,
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        String usuarioActual = obtenerUsuarioDesdeToken(authHeader);
+        String rolActual = obtenerRolDesdeToken(authHeader);
+
+        if (usuarioActual == null) {
+            return ResponseEntity.status(401)
+                    .body(Map.of("mensaje", "Token inválido o usuario no autenticado"));
+        }
+
+        Optional<Pedido> pedidoOptional = pedidoRepository.findById(id);
+
+        if (pedidoOptional.isEmpty()) {
+            return ResponseEntity.status(404)
+                    .body(Map.of("mensaje", "Pedido no encontrado"));
+        }
+
+        Pedido pedido = pedidoOptional.get();
+
+        if (!esAdmin(rolActual) && !pedido.getCliente().equalsIgnoreCase(usuarioActual)) {
+            return ResponseEntity.status(403)
+                    .body(Map.of("mensaje", "No tienes permiso para consultar este pedido"));
+        }
+
+        return ResponseEntity.ok(pedido);
     }
 
     @GetMapping("/{id}")
@@ -210,6 +248,57 @@ public class PedidoController {
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
 
         return ResponseEntity.ok(pedidoGuardado);
+    }
+
+    @Transactional
+    @PutMapping("/{id}/cancelar")
+    public ResponseEntity<?> cancelarPedidoUsuario(
+            @PathVariable Long id,
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        String usuarioActual = obtenerUsuarioDesdeToken(authHeader);
+        String rolActual = obtenerRolDesdeToken(authHeader);
+
+        if (usuarioActual == null) {
+            return ResponseEntity.status(401)
+                    .body(Map.of("mensaje", "Token inválido o usuario no autenticado"));
+        }
+
+        Optional<Pedido> pedidoOptional = pedidoRepository.findById(id);
+
+        if (pedidoOptional.isEmpty()) {
+            return ResponseEntity.status(404)
+                    .body(Map.of("mensaje", "Pedido no encontrado"));
+        }
+
+        Pedido pedido = pedidoOptional.get();
+
+        if (!esAdmin(rolActual) && !pedido.getCliente().equalsIgnoreCase(usuarioActual)) {
+            return ResponseEntity.status(403)
+                    .body(Map.of("mensaje", "No tienes permiso para cancelar este pedido"));
+        }
+
+        String estadoActual = normalizarEstado(pedido.getEstado());
+
+        if (!ESTADO_PENDIENTE.equals(estadoActual)) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("mensaje", "Solo se puede cancelar un pedido pendiente"));
+        }
+
+        if (pagoRepository.existsByPedidoId(id) || comprobanteRepository.existsByPedidoId(id)) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("mensaje", "No se puede cancelar un pedido que ya tiene pago o comprobante"));
+        }
+
+        devolverStockAlInventario(pedido);
+        pedido.setEstado(ESTADO_CANCELADO);
+
+        Pedido pedidoGuardado = pedidoRepository.save(pedido);
+
+        return ResponseEntity.ok(Map.of(
+                "mensaje", "Pedido cancelado correctamente. El stock fue devuelto al inventario.",
+                "pedido", pedidoGuardado
+        ));
     }
 
     @Transactional
@@ -463,6 +552,28 @@ public class PedidoController {
         }
 
         return jwtUtil.extractUsername(token);
+    }
+
+    private String obtenerRolDesdeToken(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return null;
+        }
+
+        String token = authHeader.substring(7);
+
+        if (!jwtUtil.validateToken(token)) {
+            return null;
+        }
+
+        return jwtUtil.extractRol(token);
+    }
+
+    private boolean esAdmin(String rol) {
+        if (rol == null) {
+            return false;
+        }
+
+        return "ADMIN".equalsIgnoreCase(rol.replace("ROLE_", "").trim());
     }
 
     private Map<Long, Integer> consolidarItems(List<ItemCarritoRequest> items) {

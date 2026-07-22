@@ -1,0 +1,152 @@
+<section class="comprobante-shell">
+  <div class="comprobante-hero no-print">
+    <div>
+      <span class="eyebrow">COMPROBANTE GENERADO</span>
+
+      <h1>Detalle del comprobante</h1>
+
+      <p>
+        Consulta la boleta o factura generada después de confirmar el pago del pedido.
+      </p>
+    </div>
+
+    <div class="hero-actions">
+      <button type="button" class="btn btn-ghost" (click)="volver()">
+        Volver a pedidos
+      </button>
+
+      <button type="button" class="btn btn-primary" (click)="imprimir()">
+        Imprimir
+      </button>
+    </div>
+  </div>
+
+  <section *ngIf="cargando" class="panel loading-panel">
+    Cargando comprobante...
+  </section>
+
+  <div *ngIf="error" class="alert error-alert no-print">
+    {{ error }}
+  </div>
+
+  <section *ngIf="!cargando && data" class="invoice-card">
+    <div class="invoice-header">
+      <div>
+        <span class="brand">CoreFlow</span>
+        <h2>{{ tipoComprobante() }}</h2>
+        <p>Sistema de Gestión Comercial Segura</p>
+      </div>
+
+      <div class="invoice-number">
+        <span>Número</span>
+        <strong>{{ data.comprobante.numeroComprobante }}</strong>
+        <p>Fecha: {{ fechaFormateada() }}</p>
+      </div>
+    </div>
+
+    <div class="invoice-info-grid">
+      <article>
+        <span>Pedido</span>
+        <strong>N.º {{ data.pedido.id }}</strong>
+        <p>Pedido asociado al comprobante</p>
+      </article>
+
+      <article>
+        <span>Cliente</span>
+        <strong>{{ data.comprobante.cliente }}</strong>
+        <p>Comprador registrado</p>
+      </article>
+
+      <article>
+        <span>Tipo</span>
+        <strong>{{ data.comprobante.tipoComprobante }}</strong>
+        <p>Documento interno generado</p>
+      </article>
+
+      <article>
+        <span>Total</span>
+        <strong>S/ {{ data.comprobante.total | number:'1.2-2' }}</strong>
+        <p>Monto pagado</p>
+      </article>
+    </div>
+
+    <div class="client-box">
+      <h3>Datos del comprobante</h3>
+
+      <div class="client-grid">
+        <div>
+          <span>Cliente</span>
+          <strong>{{ data.comprobante.cliente }}</strong>
+        </div>
+
+        <div *ngIf="!esFactura()">
+          <span>DNI / Documento</span>
+          <strong>{{ data.comprobante.documentoCliente || 'No registrado' }}</strong>
+        </div>
+
+        <ng-container *ngIf="esFactura()">
+          <div>
+            <span>Razón social</span>
+            <strong>{{ data.comprobante.razonSocial }}</strong>
+          </div>
+
+          <div>
+            <span>RUC</span>
+            <strong>{{ data.comprobante.ruc }}</strong>
+          </div>
+
+          <div>
+            <span>Dirección fiscal</span>
+            <strong>{{ data.comprobante.direccionFiscal || 'No registrada' }}</strong>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <div class="products-box">
+      <h3>Detalle de productos</h3>
+
+      <div class="products-table">
+        <div class="product-row product-head">
+          <span>Producto</span>
+          <span>Cantidad</span>
+          <span>Precio</span>
+          <span>Subtotal</span>
+        </div>
+
+        <div *ngFor="let detalle of detallesPedido()" class="product-row">
+          <span>{{ detalle.productoNombre }}</span>
+          <span>{{ detalle.cantidad }}</span>
+          <span>S/ {{ detalle.precioUnitario | number:'1.2-2' }}</span>
+          <span>S/ {{ detalle.subtotal | number:'1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="totals-section">
+      <div class="totals-card">
+        <div>
+          <span>Subtotal</span>
+          <strong>S/ {{ data.comprobante.subtotal | number:'1.2-2' }}</strong>
+        </div>
+
+        <div>
+          <span>IGV 18%</span>
+          <strong>S/ {{ data.comprobante.igv | number:'1.2-2' }}</strong>
+        </div>
+
+        <div class="grand-total">
+          <span>Total</span>
+          <strong>S/ {{ data.comprobante.total | number:'1.2-2' }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="invoice-note">
+      <p>
+        Este comprobante fue generado de manera interna por CoreFlow para fines académicos
+        y de control comercial del sistema.
+      </p>
+    </div>
+  </section>
+</section>

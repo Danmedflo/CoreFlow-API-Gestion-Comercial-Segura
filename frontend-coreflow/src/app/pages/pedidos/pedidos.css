@@ -244,8 +244,7 @@
 .order-card {
   padding: 20px;
   border-radius: 24px;
-  background:
-    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid #e5e7eb;
   box-shadow: 0 14px 38px rgba(15, 23, 42, 0.07);
 }
@@ -301,7 +300,15 @@
   line-height: 1.55;
 }
 
-.status-pill {
+.status-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.status-pill,
+.payment-pill {
   min-width: 130px;
   display: inline-flex;
   justify-content: center;
@@ -338,6 +345,16 @@
 .status-default {
   color: #334155;
   background: #e2e8f0;
+}
+
+.paid-pill {
+  color: #065f46;
+  background: #d1fae5;
+}
+
+.pending-payment-pill {
+  color: #854d0e;
+  background: #fef3c7;
 }
 
 .order-stats {
@@ -414,9 +431,18 @@
 
 .admin-actions {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) auto auto auto;
+  grid-template-columns: minmax(220px, 1fr) auto auto auto auto;
   gap: 12px;
   align-items: end;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.user-payment-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
   margin-top: 18px;
   padding-top: 18px;
   border-top: 1px solid #e5e7eb;
@@ -462,7 +488,17 @@
   background: #fee2e2;
 }
 
+.btn-warning {
+  color: #92400e;
+  background: #fef3c7;
+}
+
 .btn-edit {
+  color: #065f46;
+  background: #d1fae5;
+}
+
+.btn-success {
   color: #065f46;
   background: #d1fae5;
 }
@@ -480,9 +516,16 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .filters-grid,
-  .admin-actions {
+  .filters-grid {
     grid-template-columns: 1fr;
+  }
+
+  .admin-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .state-control {
+    grid-column: 1 / -1;
   }
 }
 
@@ -502,12 +545,14 @@
   }
 
   .hero-actions .btn,
-  .admin-actions .btn {
+  .admin-actions .btn,
+  .user-payment-actions .btn {
     width: 100%;
   }
 
   .metrics-grid,
-  .order-stats {
+  .order-stats,
+  .admin-actions {
     grid-template-columns: 1fr;
   }
 
@@ -519,7 +564,17 @@
     display: none;
   }
 
-  .status-pill {
+  .status-group {
     width: 100%;
+    align-items: stretch;
+  }
+
+  .status-pill,
+  .payment-pill {
+    width: 100%;
+  }
+
+  .user-payment-actions {
+    flex-direction: column;
   }
 }
